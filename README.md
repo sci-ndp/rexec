@@ -1,15 +1,22 @@
 # R-Exec Hub
 
-Centralized resource platform for rexec
+Centralized repository for SciDx R-Exec resources.
+
+### Packages
+- https://pypi.org/project/SciDx-rexec/
+- test package https://test.pypi.org/project/SciDx-rexec-test/ (support user id based namespace creation)
 
 ### Repositories
 
-| Component    | Repository URL                                                                                   |
-|--------------|-------------------------------------------------------------------------------------------------|
-| Client       | https://github.com/sci-ndp/SciDx-rexec                                                          |
-| Server       | https://github.com/sci-ndp/SciDx-rexec-server                                                   |
-| Broker       | https://github.com/sci-ndp/SciDx-rexec-broker                                                   |
-| Deploy API   | https://github.com/sci-ndp/rexec-server-k8s-deployment-api                                      |
+| Component    | URL                                                                                   |
+|--------------|---------------------------------------------------------------------------------------|
+| Client       | https://github.com/sci-ndp/SciDx-rexec                                                |
+| Server       | https://github.com/sci-ndp/SciDx-rexec-server                                         |
+| Broker       | https://github.com/sci-ndp/SciDx-rexec-broker                                         |
+| Deploy API   | https://github.com/sci-ndp/rexec-server-k8s-deployment-api                            |
+
+<br>
 
 ### Architecture
-![architecture diagram](arch.jpeg)
+
+![Architecture Diagram](arch.jpeg)
