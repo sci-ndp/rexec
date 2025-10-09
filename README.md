@@ -19,4 +19,4 @@ Centralized repository for SciDx R-Exec resources.
 
 ### Architecture
 
-![Architecture Diagram](arch.jpeg)
+![architecture diagram](./ref/rexec-architecture.png)
