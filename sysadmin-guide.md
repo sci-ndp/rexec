@@ -11,9 +11,11 @@
 Two components must be available:
 
 1.  SciDx Remote Execution Broker (ZeroMQ broker inside Kubernetes);
-2.  Rexec Deployment API (FastAPI that deploys per-user rexec servers).
     ```shell
     git clone https://github.com/sci-ndp/SciDx-rexec-broker
+    ```
+3.  Rexec Deployment API (FastAPI that deploys per-user rexec servers).
+    ```shell
     git clone https://github.com/sci-ndp/rexec-server-k8s-deployment-api
     ```
 
