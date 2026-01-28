@@ -10,4 +10,4 @@
 <br>
 
 ### Deployment
-See [`SciDx Remote Execution - Sysadmin Guide.md`](./SciDx%20Remote%20Execution%20-%20Sysadmin%20Guide.md) for the sysadmin deployment flow.
+See [`sysadmin-guide.md`](./sysadmin-guide.md) for the sysadmin deployment flow.
