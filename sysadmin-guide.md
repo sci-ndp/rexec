@@ -6,6 +6,15 @@
 - A reachable broker endpoint (NodePort).
 - Docker + Docker Compose for running the deployment API (or an equivalent container runtime).
 
+[Get the repos](#get-the-repos)
+<br>
+
+[Deployment](#deployment)
+    - [Step 1: Deploy the Broker (k8s)](#step-1-deploy-the-broker-k8s)
+    - [Step 2: Deploy the Rexec Deployment API (docker)](#step-2-deploy-the-rexec-deployment-api-docker)
+    - [Step 3: NDP Endpoint API (docker)](#step-3-ndp-endpoint-api-docker)
+<br>
+
 ## Get the repos
 
 Two components must be available:
@@ -14,12 +23,20 @@ Two components must be available:
     ```shell
     git clone https://github.com/sci-ndp/SciDx-rexec-broker
     ```
-3.  Rexec Deployment API (FastAPI that deploys per-user rexec servers).
+2.  Rexec Deployment API (FastAPI that deploys per-user rexec servers).
     ```shell
     git clone https://github.com/sci-ndp/rexec-server-k8s-deployment-api
     ```
+3.  NDP Endpoint API (FastAPI that provide dataset search and rexec client).
+    ```shell
+    git clone https://github.com/national-data-platform/ep-api.git
+    ```
 
-## Step 1: Deploy the Broker (k8s)
+
+## Deployment
+Before proceeding, ensure you have access to an authentication API that provides user information based on Bearer tokens. This is essential for all 3 components: broker, deployment API, and ndp-endpoint API to authenticate users. That said, you can use the test authentication API at `https://idp-test.nationaldataplatform.org/temp/information` for initial testing. please ensure to use the same AUTH_API_URL across all components.
+
+### Step 1: Deploy the Broker (k8s)
 
 1.  Set the AUTH_API_URL:
     ```shell
@@ -53,23 +70,21 @@ Two components must be available:
     ```
 
 2.  Apply Kustomize deployment:
-
     ```shell
     kubectl apply -k sci/rexec/SciDx-rexec-broker/k8s
     ```
 
 3.  Confirm
-
     ```shell
     kubectl get svc -n rexec-broker
     ```
 
 Expected:
-
 - `rexec-broker-internal-ip` (ClusterIP): server port `5560` for in-cluster servers.
 - `rexec-broker-external-ip` (NodePort): client port `30001` by default.
+<br>
 
-## Step 2: Deploy the Rexec Deployment API (docker)
+### Step 2: Deploy the Rexec Deployment API (docker)
 
 1.  Set environment variables
     ```
@@ -148,7 +163,6 @@ Expected:
     ```
 
 2.  Run it with docker compose
-
     ```shell
     docker compose up --build -d
     ```
@@ -156,3 +170,24 @@ Expected:
 3.  Confirm it’s up
 
     Swagger UI: `http://<host>:8000/docs`
+
+<br>
+
+### Step 3: NDP Endpoint API (docker)
+Please refer to: https://github.com/national-data-platform/ep-api/blob/main/README.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
