@@ -28,7 +28,7 @@ Two components must be available:
     ```shell
     git clone https://github.com/sci-ndp/rexec-server-k8s-deployment-api
     ```
-3.  NDP Endpoint API (FastAPI that provide dataset search and rexec client).
+3.  NDP Endpoint API (FastAPI that provide rexec spawn api addr and dataset search).
     ```shell
     git clone https://github.com/national-data-platform/ep-api.git
     ```
