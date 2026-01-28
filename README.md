@@ -1,12 +1,4 @@
-# R-Exec Hub
-
-Centralized repository for SciDx R-Exec resources.
-
-### Packages
-- https://pypi.org/project/SciDx-rexec/
-- test package https://test.pypi.org/project/SciDx-rexec-test/ (support user id based namespace creation)
-
-### Repositories
+# SciDx Remote Execution Resource
 
 | Component    | URL                                                                                   |
 |--------------|---------------------------------------------------------------------------------------|
@@ -17,6 +9,5 @@ Centralized repository for SciDx R-Exec resources.
 
 <br>
 
-### Architecture
-
-![architecture diagram](./ref/rexec-architecture.png)
+### Deployment
+See [`SciDx Remote Execution - Sysadmin Guide.md`](./SciDx%20Remote%20Execution%20-%20Sysadmin%20Guide.md) for the sysadmin deployment flow.
