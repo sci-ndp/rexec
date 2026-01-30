@@ -20,8 +20,12 @@ Remote Execution (Rexec) is a lightweight framework to enable remote code execut
 ## Installation
     
 ```sh
-pip install "ndp_ep[rexec]"
+pip install ndp_ep[rexec]
 ```
+
+If you're using zsh, wrap extras in double quotes to avoid `[]` glob expansion:
+`pip install "ndp_ep[rexec]"`
+
 
 ### Local Dev Setup
 1.  ep-py-lib local dev - editable ep lib
