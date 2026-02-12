@@ -1,0 +1,44 @@
+# Global defaults shared by all components
+# ---
+global:
+  authApiUrl: "https://idp-test.nationaldataplatform.org/temp/information"
+  imagePullSecrets: []
+
+
+# SciDx Remote Execution Broker
+# ---
+broker:
+  enabled: true
+  authApiUrl: ""
+  image:
+    repository: "yutianqin/scidx-rexec-broker"
+    tag: "latest"
+    pullPolicy: Always
+  service:
+    external:
+      clientNodePort: 30005
+      controlNodePort: 30006
+  replicaCount: 1
+
+
+# SciDx Remote Execution Server Deployment API
+# ---
+deploymentApi:
+  enabled: true
+  image:
+    repository: "yutianqin/rexec-server-k8s-deployment-api"
+    tag: "latest"
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+      - host: ""
+        paths:
+          - path: /rexec
+            pathType: Prefix
+  env:
+    rexecServerNamespacePrefix: "rexec-server-"
+    enableGroupBasedAccess: false
+    groupNames: ""
+    rootPath: "/rexec"

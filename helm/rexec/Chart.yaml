@@ -1,0 +1,16 @@
+apiVersion: v2
+name: rexec-stack
+description: Deploy the SciDx Rexec broker, rexec server deployment API
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+dependencies:
+  - name: broker
+    version: 0.1.0
+    repository: "file://./scidx-rexec-broker"
+    condition: broker.enabled
+  - name: deployment-api
+    version: 0.1.0
+    repository: "file://./scidx-rexec-server-deploy-api"
+    alias: deploymentApi
+    condition: deploymentApi.enabled
