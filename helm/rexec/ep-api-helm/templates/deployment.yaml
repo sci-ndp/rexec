@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ndp-ep-api.fullname" . }}
+  labels:
+    {{- include "ndp-ep-api.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ndp-ep-api.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "ndp-ep-api.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ include "ndp-ep-api.name" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.containerPort }}
+          {{- if or .Values.envSecret.enabled .Values.rootPath.enabled }}
+          envFrom:
+            {{- if .Values.envSecret.enabled }}
+            - secretRef:
+                name: {{ .Values.envSecret.name }}
+            {{- end }}
+            {{- if .Values.rootPath.enabled }}
+            - configMapRef:
+                name: {{ .Values.rootPath.configMap.name }}
+            {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

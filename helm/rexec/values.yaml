@@ -42,3 +42,30 @@ deploymentApi:
     enableGroupBasedAccess: false
     groupNames: ""
     rootPath: "/rexec"
+
+
+# NDP Endpoint API
+# ---
+epApi:
+  enabled: true
+  nameOverride: "ndp-ep-api"
+  fullnameOverride: "ndp-ep-api"
+  image:
+    repository: "rbardaji/ndp-ep-api"
+    tag: "latest"
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    className: ""
+    host: ""
+    path: "/api"
+  rootPath:
+    enabled: true
+    value: "/api"
+  resources:
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+    requests:
+      memory: "256Mi"
+      cpu: "250m"

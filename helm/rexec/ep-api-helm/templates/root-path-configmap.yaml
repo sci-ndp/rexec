@@ -1,0 +1,10 @@
+{{- if and .Values.rootPath.enabled .Values.rootPath.configMap.create }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.rootPath.configMap.name }}
+  labels:
+    {{- include "ndp-ep-api.labels" . | nindent 4 }}
+data:
+  ROOT_PATH: {{ .Values.rootPath.value | quote }}
+{{- end }}
