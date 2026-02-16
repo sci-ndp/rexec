@@ -35,6 +35,15 @@ env:
   groupNames: ""
   rootPath: ""
 
+streaming:
+  enabled: false
+  defaultMode: "request_reply"
+  maxDurationSeconds: 3600
+  maxIdleSeconds: 120
+  heartbeatIntervalSeconds: 15
+  gracefulShutdownTimeoutSeconds: 30
+  defaultBufferMaxMessages: 1000
+
 kubeconfig:
   existingSecret: ""
   secretKey: "config"

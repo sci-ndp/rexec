@@ -38,6 +38,8 @@ In order to enable Remote Execution functionality in NDP Endpoint that you provi
 
 > By following this doc, you will configure and deploy these 3 components, which are shown on the right of the diagram below. 
 
+For long-running function workloads (for example Kafka subscriptions), see the streaming protocol and rollout guide in [`streaming-mode-spec.md`](./streaming-mode-spec.md).
+
 ![Rexec System Architecture](./ref/svg/rexec-sysadmin-highlight.svg)
 
 [View the system architecture diagram (SVG)](./ref/svg/rexec-sysadmin-highlight.svg)
@@ -184,7 +186,6 @@ Expected:
 
 ### Step 3: NDP Endpoint API (docker)
 Please refer to: https://github.com/national-data-platform/ep-api/blob/main/README.md
-
 
 
 

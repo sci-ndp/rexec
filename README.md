@@ -11,6 +11,7 @@ Remote Execution (Rexec) is a lightweight framework to enable remote code execut
 [Guide](#guide)
     - [NDP Endpoint Provider](#ndp-endpoint-provider)
     - [End User](#end-user)
+    - [Streaming Mode Spec](#streaming-mode-spec)
 <br>
 
 [Source Repo](#source-repo)
@@ -59,6 +60,9 @@ Follow the sysadmin deployment flow in [`sysadmin-guide.md`](./sysadmin-guide.md
 
 ### End User: 
 Learn to use NDP Endpoint with Remote Execution, walk through the example notebook: [`ndp-ep-rexec.ipynb`](./demo/ndp-ep-rexec.ipynb).
+
+### Streaming Mode Spec:
+For long-running workloads (for example Kafka subscriptions), see: [`streaming-mode-spec.md`](./streaming-mode-spec.md).
 
 <br>
 

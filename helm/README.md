@@ -58,6 +58,14 @@ deploymentApi:
     enableGroupBasedAccess: false
     groupNames: ""
     rootPath: "/<api-root-path>"
+  streaming:
+    enabled: false
+    defaultMode: "request_reply"
+    maxDurationSeconds: 3600
+    maxIdleSeconds: 120
+    heartbeatIntervalSeconds: 15
+    gracefulShutdownTimeoutSeconds: 30
+    defaultBufferMaxMessages: 1000
 
 ```
 

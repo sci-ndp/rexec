@@ -59,6 +59,20 @@ spec:
               value: {{ .Values.env.groupNames | quote }}
             - name: APP_ROOT_PATH
               value: {{ .Values.env.rootPath | quote }}
+            - name: REXEC_STREAMING_ENABLED
+              value: {{ .Values.streaming.enabled | quote }}
+            - name: REXEC_STREAMING_DEFAULT_MODE
+              value: {{ .Values.streaming.defaultMode | quote }}
+            - name: REXEC_STREAMING_MAX_DURATION_SECONDS
+              value: {{ .Values.streaming.maxDurationSeconds | quote }}
+            - name: REXEC_STREAMING_MAX_IDLE_SECONDS
+              value: {{ .Values.streaming.maxIdleSeconds | quote }}
+            - name: REXEC_STREAMING_HEARTBEAT_INTERVAL_SECONDS
+              value: {{ .Values.streaming.heartbeatIntervalSeconds | quote }}
+            - name: REXEC_STREAMING_GRACEFUL_SHUTDOWN_TIMEOUT_SECONDS
+              value: {{ .Values.streaming.gracefulShutdownTimeoutSeconds | quote }}
+            - name: REXEC_STREAMING_DEFAULT_BUFFER_MAX_MESSAGES
+              value: {{ .Values.streaming.defaultBufferMaxMessages | quote }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
