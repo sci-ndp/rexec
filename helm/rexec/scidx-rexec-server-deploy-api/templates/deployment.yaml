@@ -54,9 +54,9 @@ spec:
             - name: AUTH_API_URL
               value: {{ default .Values.global.authApiUrl .Values.authApiUrl | quote }}
             - name: ENABLE_GROUP_BASED_ACCESS
-              value: {{ .Values.env.enableGroupBasedAccess | quote }}
+              value: {{ default .Values.global.enableGroupBasedAccess .Values.env.enableGroupBasedAccess | quote }}
             - name: GROUP_NAMES
-              value: {{ .Values.env.groupNames | quote }}
+              value: {{ default .Values.global.groupNames .Values.env.groupNames | quote }}
             - name: APP_ROOT_PATH
               value: {{ .Values.env.rootPath | quote }}
             {{- with .Values.extraEnv }}
