@@ -28,4 +28,4 @@ output/
 *.log
 
 *.env
-values.yaml
+/rexec/values.yaml
