@@ -22,12 +22,35 @@ vi ./helm/rexec/values.yaml
 # Global defaults shared by all components
 # ---
 global:
+  # ==============================================
+  # Authentication Configuration
+  # ==============================================
+  # URL for the authentication API to retrieve user information
+  # This endpoint is used to validate tokens and fetch user details
   authApiUrl: https://idp-test.nationaldataplatform.org/temp/information
-
+  # ==============================================
+  # ACCESS CONTROL (Optional)
+  # ==============================================
+  # Group-based access control restricts write operations (POST, PUT, DELETE)
+  # to users belonging to specific groups. GET endpoints remain public.
+  #
+  # How it works:
+  # 1. User authenticates with Bearer token
+  # 2. API validates token against AUTH_API_URL and retrieves user's groups
+  # 3. If ENABLE_GROUP_BASED_ACCESS=True, checks if user belongs to any group in GROUP_NAMES
+  # 4. Access granted only if user's groups overlap with GROUP_NAMES
+  #
+  # Group matching is case-insensitive (e.g., "Admins" matches "admins")
+  # Enable group-based access control (true/false)
+  enableGroupBasedAccess: true
+  # Comma-separated list of allowed groups for write operations
+  # Example: groupNames=admins,developers,data-managers
+  # If empty and enableGroupBasedAccess=true, all write operations will be denied
+  groupNames: /ndp_ep/ep-694b12d8b60dd2c1dd26f669
 
 # SciDx Remote Execution Broker
 # ---
-broker:
+rexec-broker:
   enabled: true
   service:
     external:
@@ -38,7 +61,7 @@ broker:
 
 # SciDx Remote Execution Server Deployment API
 # ---
-deploymentApi:
+rexec-server-deployment-api:
   enabled: true
   ingress:
     enabled: true
@@ -55,7 +78,7 @@ deploymentApi:
 
 # NDP Endpoint API
 # ---
-epApi:
+ndp-ep-api:
   enabled: true
   resources:
     limits:
