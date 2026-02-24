@@ -35,5 +35,12 @@ spec:
                 name: {{ .Values.rootPath.configMap.name }}
             {{- end }}
           {{- end }}
+          env:
+            - name: AUTH_API_URL
+              value: {{ default .Values.global.authApiUrl .Values.authApiUrl | quote }}
+            - name: ENABLE_GROUP_BASED_ACCESS
+              value: {{ default .Values.global.enableGroupBasedAccess .Values.enableGroupBasedAccess | quote }}
+            - name: GROUP_NAMES
+              value: {{ default .Values.global.groupNames .Values.groupNames | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
