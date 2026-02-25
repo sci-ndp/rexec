@@ -123,7 +123,7 @@ ndp-ep-api:
   helm dependency update ./helm/rexec
   ```
 
-Optional: Before deploying, render manifests locally: `helm template rexec ./helm/rexec --debug`
+Optional: Before deploying, render manifests locally: `helm template rexec ./helm/rexec --debug` for debugging and verification.
 
 2.**Install or upgrade the chart:**
 ```sh
