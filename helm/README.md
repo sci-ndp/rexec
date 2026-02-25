@@ -29,16 +29,16 @@ global:
   # This endpoint is used to validate tokens and fetch user details
   authApiUrl: https://idp-test.nationaldataplatform.org/temp/information
   # ==============================================
-  # ACCESS CONTROL (Optional)
+  # Access Control (Optional) for: Rexec Server Deployment API and NDP Endpoint API
   # ==============================================
   # Group-based access control restricts write operations (POST, PUT, DELETE)
   # to users belonging to specific groups. GET endpoints remain public.
   #
   # How it works:
   # 1. User authenticates with Bearer token
-  # 2. API validates token against AUTH_API_URL and retrieves user's groups
-  # 3. If ENABLE_GROUP_BASED_ACCESS=True, checks if user belongs to any group in GROUP_NAMES
-  # 4. Access granted only if user's groups overlap with GROUP_NAMES
+  # 2. API validates token against authApiUrl and retrieves user's groups
+  # 3. If enableGroupBasedAccess=true, checks if user belongs to any group in groupNames
+  # 4. Access granted only if user's groups overlap with groupNames
   #
   # Group matching is case-insensitive (e.g., "Admins" matches "admins")
   # Enable group-based access control (true/false)
