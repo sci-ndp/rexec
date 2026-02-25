@@ -27,3 +27,5 @@ output/
 # Logs
 *.log
 
+*.env
+/rexec/values.yaml

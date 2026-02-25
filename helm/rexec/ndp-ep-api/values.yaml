@@ -39,10 +39,10 @@ envSecret:
   enabled: true
   create: true
   name: ndp-ep-env-secret
-  # Optional: supply a local .env-style file at install time
+  # Optional: supply a local .env-style file at install time.
+  # Keep empty to configure env vars only via `env` values.
   # e.g. helm install ... --set-file envSecret.envFile=./env-secret.env
-  # You can also set this to a chart-relative file path like "env-secret.env".
-  envFile: "env-secret.env"
+  envFile: ""
 
 # Key-value pairs for the env secret (stringData).
 # This can override keys also present in envFile.
