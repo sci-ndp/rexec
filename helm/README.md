@@ -46,7 +46,8 @@ global:
   # Comma-separated list of allowed groups for write operations
   # Example: groupNames=admins,developers,data-managers
   # If empty and enableGroupBasedAccess=true, all write operations will be denied
-  groupNames: /ndp_ep/ep-694b12d8b60dd2c1dd26f669
+  groupNames: /ndp_ep/ep-************************
+
 
 # SciDx Remote Execution Broker
 # ---
@@ -96,9 +97,22 @@ ndp-ep-api:
     enabled: true
     value: /api
   env:
-    ORGANIZATION: My organization
-    EP_NAME: My EP
+    # ==============================================
+    # ORGANIZATION
+    # ==============================================
+    ORGANIZATION: <Your Organization Name>
+    EP_NAME: <Your Endpoint Name>
+    
     ...
+
+    # ==============================================
+    # Rexec Deployment API Configuration
+    # ==============================================
+    # Enable or disable Remote Execution Deployment API connectivity (True/False)
+    REXEC_CONNECTION: True
+    # Remote Execution Deployment API URL
+    # This should be the public addr of the rexec-server-deployment-api component deployed by this chart 
+    REXEC_DEPLOYMENT_API_URL: <Base URL of Rexec Deployment API>
 ```
 
 

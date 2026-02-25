@@ -119,7 +119,7 @@ ndp-ep-api:
     #
     # Note: The variable name contains "CKAN" for historical reasons, but it applies
     # to all local catalog backends (CKAN, MongoDB, etc.)
-    CKAN_LOCAL_ENABLED: True
+    CKAN_LOCAL_ENABLED: False
 
     # ==============================================
     # CKAN-SPECIFIC CONFIGURATION (only if LOCAL_CATALOG_BACKEND=ckan)
@@ -151,7 +151,7 @@ ndp-ep-api:
     # Streaming Configuration
     # ==============================================
     # Enable or disable Kafka connectivity (True/False)
-    KAFKA_CONNECTION: True
+    KAFKA_CONNECTION: False
     # Kafka broker hostname or IP address
     KAFKA_HOST: 
     # Kafka broker port number
@@ -209,7 +209,7 @@ ndp-ep-api:
     # Rexec Deployment API Configuration
     # ==============================================
     # Enable or disable Remote Execution Deployment API connectivity (True/False)
-    REXEC_CONNECTION: False
+    REXEC_CONNECTION: True
     # Remote Execution Deployment API URL
     REXEC_DEPLOYMENT_API_URL:
 
