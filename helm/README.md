@@ -74,8 +74,6 @@ rexec-server-deployment-api:
           - path: /rexec
   env:
     rexecServerNamespacePrefix: rexec-server-
-    enableGroupBasedAccess: false
-    groupNames: 
     rootPath: /rexec
 
 
