@@ -55,7 +55,8 @@ If you're using zsh, wrap extras in double quotes to avoid `[]` glob expansion:
 
 ## Guide
 ### NDP Endpoint Provider:
-Follow the sysadmin deployment flow in [`sysadmin-guide.md`](./sysadmin-guide.md).
+Follow the sysadmin deployment flow to provide SciDx Remote Execution service: [`helm`](https://github.com/sci-ndp/rexec/blob/main/helm/README.md).<br>
+> Legacy manual deployment instructions are in [`manual-deploy`](./reference/legacy-doc/sysadmin-guide.md).
 
 ### End User: 
 Learn to use NDP Endpoint with Remote Execution, walk through the example notebook: [`ndp-ep-rexec.ipynb`](./demo/ndp-ep-rexec.ipynb).
