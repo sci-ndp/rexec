@@ -38,11 +38,9 @@ In order to enable Remote Execution functionality in NDP Endpoint that you provi
 
 > By following this doc, you will configure and deploy these 3 components, which are shown on the right of the diagram below. 
 
-For long-running function workloads (for example Kafka subscriptions), see the streaming protocol and rollout guide in [`streaming-mode-spec.md`](./streaming-mode-spec.md).
+![Rexec System Architecture](../svg/rexec-sysadmin-highlight.svg)
 
-![Rexec System Architecture](./ref/svg/rexec-sysadmin-highlight.svg)
-
-[View the system architecture diagram (SVG)](./ref/svg/rexec-sysadmin-highlight.svg)
+[View the system architecture diagram (SVG)](../svg/rexec-sysadmin-highlight.svg)
 
 ## Deployment
 Before proceeding, ensure you have access to an authentication API that provides user information based on Bearer tokens. This is essential for all 3 components: broker, deployment API, and ndp-endpoint API to authenticate users. That said, you can use the test authentication API at `https://idp-test.nationaldataplatform.org/temp/information` for initial testing. please ensure to use the same AUTH_API_URL across all components.
