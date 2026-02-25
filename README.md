@@ -41,6 +41,7 @@ which are shown and highlighted on the right of the diagram below.
 
 ![Rexec System Architecture](./reference/svg/rexec-sysadmin-highlight.svg)
 
+[View the system architecture diagram (SVG)](./reference//svg/rexec-sysadmin-highlight.svg)
 <br>
 
 Legacy manual deployment instructions are in [`manual-deploy`](./reference/legacy-doc/sysadmin-guide.md).
