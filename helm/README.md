@@ -25,15 +25,16 @@ global:
   # ==============================================
   # Authentication Configuration
   # ==============================================
-  # URL for the authentication API to retrieve user information
-  # This endpoint is used to validate tokens and fetch user details
+  # URL for the authentication API to retrieve user information;
+  # All (Rexec Broker, Rexec Deployment API and NDP Endpoint API) will use
+  # this URL for authentication and user group memebership info retrieval.
   authApiUrl: https://idp-test.nationaldataplatform.org/temp/information
+
   # ==============================================
   # Access Control (Optional) for: Rexec Server Deployment API and NDP Endpoint API
   # ==============================================
   # Group-based access control restricts write operations (POST, PUT, DELETE)
-  # to users belonging to specific groups. GET endpoints remain public.
-  #
+  # to users belonging to specific groups.
   # How it works:
   # 1. User authenticates with Bearer token
   # 2. API validates token against authApiUrl and retrieves user's groups
