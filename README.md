@@ -71,7 +71,7 @@ Legacy manual deployment instructions are in [`manual-deploy`](./reference/legac
     ```sh
     pip install scidx-rexec
     ```
-    [direct-rexec-lib.ipynb](./demo/direct-rexec-lib.ipynb) shows how to use rexec lib directly without orchastrating with NDP Endpoint.
+    [direct-rexec-lib.ipynb](./user/direct-rexec-lib.ipynb) shows how to use rexec lib directly without orchastrating with NDP Endpoint.
 
 ## Source Repos:
 |              |                                                                                       |
