@@ -1,5 +1,0 @@
-apiVersion: v2
-name: rexec-broker
-description: SciDx Remote Execution broker
-version: 0.1.0
-appVersion: "0.1.0"
