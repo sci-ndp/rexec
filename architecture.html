@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture - Remote Execution</title>
+  <meta name="description" content="Deep dive into the SciDx Remote Execution system architecture: ZeroMQ broker, server lifecycle, auth flow, and Kubernetes topology." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
+</head>
+<body class="page-body">
+
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="user-guide.html">User Guide</a></li>
+    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+    <li><a href="developer-guide.html">Developer</a></li>
+    <li><a href="architecture.html" class="active">Architecture</a></li>
+    <li><a href="helm-chart.html">Helm Chart</a></li>
+    <li><a href="api-reference.html">API Reference</a></li>
+  </ul>
+  <span class="nav-version">v0.0.8</span>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank">GitHub ↗</a>
+</header>
+
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
+  <div class="hero-inner">
+    <div class="hero-badge">System Design</div>
+    <h1>Architecture</h1>
+    <p>
+      A deep dive into how SciDx Remote Execution connects local Python environments to remote Kubernetes compute
+      through ZeroMQ message routing, token-based authentication, and on-demand pod provisioning.
+    </p>
+  </div>
+</section>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Overview</div>
+      <ul>
+        <li><a href="#overview">System Overview</a></li>
+        <li><a href="#components">Components</a></li>
+        <li><a href="#full-diagram">Full Diagram</a></li>
+        <li><a href="#sysadmin-view">Sysadmin View</a></li>
+      </ul>
+      <div class="sidebar-section">Deep Dive</div>
+      <ul>
+        <li><a href="#zmq">ZeroMQ Transport</a></li>
+        <li><a href="#broker-internals">Broker Internals</a></li>
+        <li><a href="#server-lifecycle">Server Lifecycle</a></li>
+        <li><a href="#auth-flow">Auth Flow</a></li>
+        <li><a href="#network-topology">Network Topology</a></li>
+      </ul>
+      <div class="sidebar-section">Design Decisions</div>
+      <ul>
+        <li><a href="#why-zmq">Why ZeroMQ?</a></li>
+        <li><a href="#why-per-user">Why Per-User Pods?</a></li>
+        <li><a href="#scalability">Scalability</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="doc-content">
+
+    <h2 id="overview">System Overview</h2>
+    <p>
+      Rexec enables a <strong>local Python client</strong> (inside a Jupyter Notebook or script)
+      to transparently execute functions on a <strong>remote Kubernetes cluster</strong>.
+      The architecture has five logical layers:
+    </p>
+
+    <div class="grid grid-2" style="margin-bottom:1.5rem;">
+      <div class="card">
+        <div class="card-icon" style="background:#EEF4FF;color:var(--blue);">①</div>
+        <h4>Client Layer</h4>
+        <p>The <code>ndp_ep</code> or <code>scidx-rexec</code> Python library running on the user's machine. Serializes function objects and sends them over ZeroMQ.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#ECFDF5;color:#065F46;">②</div>
+        <h4>NDP EP API</h4>
+        <p>FastAPI gateway. Provides the broker address and spawn API URL to authenticated clients. Also provides dataset discovery.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#FFF7ED;color:#92400E;">③</div>
+        <h4>ZeroMQ Broker</h4>
+        <p>Stateless message router deployed inside the cluster. Routes function call frames between N clients and N dedicated server pods.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#FEF2F2;color:#7F1D1D;">④</div>
+        <h4>Deploy API</h4>
+        <p>FastAPI service that provisions and tears down per-user <code>rexec-server</code> pods via the Kubernetes API.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#F5F3FF;color:#5B21B6;">⑤</div>
+        <h4>Rexec Server Pods</h4>
+        <p>Per-user worker pods running inside the cluster. Connect to the broker's internal address and execute dispatched Python functions.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#F0FDFA;color:#065F46;">⑥</div>
+        <h4>Auth API</h4>
+        <p>External identity provider. All components validate Bearer tokens against the same <code>AUTH_API_URL</code> endpoint.</p>
+      </div>
+    </div>
+
+    <h2 id="full-diagram">Full System Diagram</h2>
+    <div class="arch-diagram" style="padding:1.5rem;">
+      <img
+        src="https://github.com/sci-ndp/rexec/blob/main/reference/rexec-arc.png"
+        alt="Rexec Full Architecture Diagram"
+        style="max-width:100%; border-radius:8px;"
+        onerror="this.outerHTML='<p style=\'color:rgba(255,255,255,.5);padding:3rem;\'>Diagram loads from GitHub raw content. View it directly at <a href=\'https://github.com/sci-ndp/rexec/blob/main/reference/rexec-arc.png\' style=\'color:#7DD3FC;\'>reference/rexec-arc.png</a></p>'"
+      />
+    </div>
+    <p style="text-align:center; font-size:.8rem; color:var(--muted); margin-top:.5rem;">
+      Source: <a href="https://github.com/sci-ndp/rexec/blob/main/reference/rexec-arc.png" target="_blank">reference/rexec-arc.png</a>
+    </p>
+
+    <h2 id="sysadmin-view">Sysadmin Highlight — What You Deploy</h2>
+    <div class="callout callout-info">
+      <span class="callout-icon">🏗️</span>
+      <div class="callout-body">
+        The components highlighted below are what an NDP Endpoint Provider deploys.
+        The client-side and Auth API are external to your infrastructure.
+      </div>
+    </div>
+    <div class="arch-diagram" style="padding:1.5rem;">
+      <img
+        src="https://raw.githubusercontent.com/sci-ndp/rexec/main/reference/svg/rexec-sysadmin-highlight.svg"
+        alt="Rexec Architecture — Sysadmin Components Highlighted"
+        style="max-width:100%; border-radius:8px;"
+        onerror="this.outerHTML='<p style=\'color:rgba(255,255,255,.5);padding:3rem;\'>View at <a href=\'https://github.com/sci-ndp/rexec/blob/main/reference/svg/rexec-sysadmin-highlight.svg\' style=\'color:#7DD3FC;\'>reference/svg/rexec-sysadmin-highlight.svg</a></p>'"
+      />
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="zmq">ZeroMQ Transport Layer</h2>
+    <p>
+      Rexec uses <a href="https://zeromq.org/" target="_blank">ZeroMQ</a> as its transport
+      layer for low-latency, high-throughput message passing between clients and server pods.
+    </p>
+
+    <h3>Socket Pattern: ROUTER–DEALER</h3>
+    <div class="pre-wrap">
+      <pre><code><span class="cm">┌─────────────────────────────────────────────────────────┐</span>
+<span class="cm">│                   ZeroMQ Broker Pod                     │</span>
+<span class="cm">│                                                         │</span>
+<span class="cm">│   ROUTER frontend          ROUTER backend               │</span>
+<span class="cm">│   (NodePort 30001)         (ClusterIP 5560)             │</span>
+<span class="cm">│        │                         │                      │</span>
+<span class="cm">│        ▼                         ▼                      │</span>
+<span class="cm">│   [routing table] ←────────→ [routing table]            │</span>
+<span class="cm">└─────────────────────────────────────────────────────────┘</span>
+         │                         │
+         ▼                         ▼
+   Client (DEALER)          Server Pod (DEALER)
+   tcp://&lt;node&gt;:30001       tcp://rexec-broker-internal-ip:5560</code></pre>
+    </div>
+
+    <ul>
+      <li><strong>Frontend (ROUTER)</strong>: Accepts client connections on the external NodePort. Identifies each client by its ZMQ identity frame.</li>
+      <li><strong>Backend (ROUTER)</strong>: Accepts connections from server pods on the internal ClusterIP. Routes responses back to originating clients.</li>
+      <li><strong>Stateless</strong>: The broker does not store job state — it is a pure message router. Failure recovery is handled at the application layer.</li>
+    </ul>
+
+    <h3>Message Frame Structure(outdated; need to update this section to reflect current output stream zmq msg structure</h3>
+    <div class="pre-wrap">
+      Client → Broker → Server
+        <pre><code>[client-identity] [empty] [token] [function-dill] [args-dill]</code></pre>
+      Server → Broker → Client
+        <pre><code>[client-identity] [empty] [status] [result-dill]</code></pre>
+    </div>
+
+    <h3>Port Reference</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Port</th><th>Service Name</th><th>Type</th><th>Who Connects</th></tr></thead>
+        <tbody>
+          <tr><td>30001(external)</td><td>rexec-broker-external-ip</td><td>NodePort</td><td>External clients (users)</td></tr>
+          <tr><td>30002(external)</td><td>rexec-broker-external-ip</td><td>NodePort</td><td>Management / control</td></tr>
+          <tr><td>5560(internal)</td><td>rexec-broker-internal-ip</td><td>ClusterIP</td><td>Server pods (in-cluster)</td></tr>
+          <tr><td>/rexec</td><td>rexec-server-deployment-api</td><td>Ingress (HTTP)</td><td>NDP EP API (internal)</td></tr>
+          <tr><td>/api</td><td>ndp-ep-api</td><td>Ingress (HTTP)</td><td>External clients (users)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="broker-internals">Broker Internals</h2>
+    <p>
+      The broker is deployed as a single Kubernetes <code>Deployment</code> with a
+      <code>replicaCount</code> of 1 by default. It exposes two Kubernetes Services:
+    </p>
+    <div class="pre-wrap">
+      <pre><code>rexec-broker-external-ip  (NodePort)
+  └── port 30001/TCP → broker frontend (client-facing)
+  └── port 30002/TCP → broker control
+
+rexec-broker-internal-ip  (ClusterIP)
+  └── port 5560/TCP  → broker backend (server pod-facing)</code></pre>
+    </div>
+
+    <h2 id="server-lifecycle">Server Pod Lifecycle</h2>
+    <div class="pre-wrap">
+      <pre><code> Sysadmin pre-deploys all three components to Kubernetes (via Helm chart):
+ ┌─────────────────────────────────────────────────────────────────────────┐
+ │  Kubernetes                                                             │
+ │  [NDP EP API pod]   [Deploy API pod]   [Broker pod]                    │
+ └─────────────────────────────────────────────────────────────────────────┘
+ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+User            [NDP EP API pod]     [Deploy API pod]      Kubernetes
+ │                      │                    │                    │
+ │── GET /api/rexec ───▶│                    │                    │
+ │   Bearer token       │── POST /spawn ────▶│                    │
+ │                      │   token            │── create ns ──────▶│
+ │                      │                    │── create pod ─────▶│  [Server pod]
+ │                      │                    │                    │
+ │                      │                    │◀── pod running ────│
+ │ ◀──────────────────────── {broker_url} ───│                    │
+ │                      │                    │  [Server pod] connects to [Broker pod]:5560
+ │                      │                    │                    │
+ │── ZMQ connect ───────────────────────────────────────────────▶ [Broker pod]
+ │   (broker_url:30001) │                    │                    │
+ │── send(fn) ──────────────────────────────────────────────────▶ [Broker pod]
+ │                      │                    │                      ──▶ [Server pod]
+ │                      │                    │                          [executes fn]
+ │◀── result ─────────────────────────────────────────────────── [Broker pod]
+ |                      │                    │                    │
+ </code></pre>
+    </div>
+
+    <h2 id="auth-flow">Authentication Flow</h2>
+    <p>
+      Every component in the stack validates the user's Bearer token independently against
+      the configured <code>AUTH_API_URL</code>. This means the identity provider is the
+      single source of truth for all access decisions.
+    </p>
+    <div class="pre-wrap">
+      <pre><code><span class="cm">Token validation happens at 3 independent points:</span>
+
+1. NDP EP API   → validates token + (optionally) group membership before returning Rexec Server Spawn API addr
+2. Deploy API   → validates token + (optionally) group membership before provisioning server pod
+3. ZMQ Broker   → validates token on connection handshake before routing messages</code></pre>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>All components must use the same AUTH_API_URL.</strong>
+        A token issued by IDP-A will be rejected by a component configured to validate
+        against IDP-B.
+      </div>
+    </div>
+
+    <h2 id="network-topology">Kubernetes Network Topology</h2>
+    <div class="pre-wrap">
+      <pre><code><span class="cm">External Network</span>
+┌──────────────────────────────────────────────────────────────┐
+│ User Laptop / Jupyter                                        │
+│   ndp_ep client ──→ HTTPS /api/*    ──→ [Ingress] NDP EP API │
+│   scidx_rexec   ──→ TCP  :30001     ──→ [NodePort] Broker    │
+└──────────────────────────────────────────────────────────────┘
+
+<span class="cm">Kubernetes Cluster</span>
+┌──────────────────────────────────────────────────────────────┐
+│  Namespace: rexec                                            │
+│  ┌────────────────┐   ┌──────────────────────────────────┐   │
+│  │  NDP EP API    │──▶│  Deploy API                      │   │
+│  │  (Ingress /api)│   │  (Ingress /rexec)                │   │
+│  └────────────────┘   └──────────────────────────────────┘   │
+│                                   │ kubectl                  │
+│  Namespace: rexec-broker          ▼                          │
+│  ┌────────────────┐  Namespace: rexec-server-&lt;user&gt;          │
+│  │  Broker Pod    │  ┌───────────────────────────────────┐   │
+│  │  :30001 (ext)  │◀─│  rexec-server Pod                 │   │
+│  │  :5560  (int)  │─▶│  (ephemeral, per-user)            │   │
+│  └────────────────┘  └───────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+
+<span class="cm">External Auth</span>
+┌──────────────────────────────────────────────────────────────┐
+│  AUTH_API_URL  (e.g. idp-test.nationaldataplatform.org)      │
+│  ← All 3 in-cluster components validate tokens here          │
+└──────────────────────────────────────────────────────────────┘</code></pre>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="why-zmq">Design Decision: Why ZeroMQ?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>✅ Low latency</h4>
+        <p>ZeroMQ's lock-free queuing and minimal framing overhead keep round-trip times in the single-millisecond range for typical function payloads.</p>
+      </div>
+      <div class="card">
+        <h4>✅ Language agnostic</h4>
+        <p>ZeroMQ has bindings for 30+ languages. Future server implementations in Julia, R, or Rust are straightforward.</p>
+      </div>
+      <div class="card">
+        <h4>✅ N:M routing</h4>
+        <p>A single ROUTER–DEALER broker naturally handles N clients talking to M server pods without any coordination overhead.</p>
+      </div>
+      <div class="card">
+        <h4>✅ No message queue infrastructure</h4>
+        <p>No Kafka, RabbitMQ, or Redis required. The broker itself is the queue — one fewer service to operate.</p>
+      </div>
+    </div>
+
+    <h2 id="why-per-user">Design Decision: Why Per-User Server Pods?</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <h4>✅ Isolation</h4>
+        <p>Each user gets a dedicated Python process. One user's long-running job or crash cannot affect another user's session.</p>
+      </div>
+      <div class="card">
+        <h4>✅ Resource limits</h4>
+        <p>Kubernetes resource requests/limits can be applied per pod, giving fine-grained CPU/memory accounting per user.</p>
+      </div>
+      <div class="card">
+        <h4>✅ Custom environments</h4>
+        <p>Different users can get different container images (e.g., different Python packages) by configuring the Deploy API.</p>
+      </div>
+      <div class="card">
+        <h4>⚖️ Trade-off: startup time</h4>
+        <p>Pod provisioning takes 5–30s. For interactive workflows this is acceptable; for sub-second latency, a pre-warmed pool approach would be needed.</p>
+      </div>
+    </div>
+
+    <h2 id="scalability">Scalability Considerations</h2>
+    <ul>
+      <li><strong>Broker</strong>: Stateless ROUTER–DEALER pattern scales horizontally with care (ZMQ routing must be sticky per-session). Single replica is sufficient for most workloads.</li>
+      <li><strong>Server pods</strong>: Scale naturally — each user gets a pod. The limiting factor is cluster node capacity.</li>
+      <li><strong>Deploy API</strong>: Stateless FastAPI; can scale to multiple replicas without issue.</li>
+      <li><strong>NDP EP API</strong>: Stateless FastAPI with HPA support built into the Helm chart.</li>
+    </ul>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+}, { passive: true });
+</script>
+</body>
+</html>

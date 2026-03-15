@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sysadmin Guide - Remote Execution</title>
+  <meta name="description" content="NDP Endpoint Provider deployment guide for Rexec broker, Deploy API, and NDP Endpoint API via Helm." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
+</head>
+<body class="page-body">
+
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="user-guide.html">User Guide</a></li>
+    <li><a href="sysadmin-guide.html" class="active">Sysadmin Guide</a></li>
+    <li><a href="developer-guide.html">Developer</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="helm-chart.html">Helm Chart</a></li>
+    <li><a href="api-reference.html">API Reference</a></li>
+  </ul>
+  <span class="nav-version">v0.0.8</span>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank">GitHub ↗</a>
+</header>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#001642 0%,#0D2D6E 60%,#1E4FA0 100%);">
+  <div class="hero-inner">
+    <div class="hero-badge">NDP Endpoint Provider</div>
+    <h1>Sysadmin Guide</h1>
+    <p>
+      Deploy the full Rexec stack — broker, server deployment API, and NDP Endpoint API —
+      on your Kubernetes cluster using a single Helm chart.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#helm-deploy">Helm Deployment (recommended)</a>
+      <a class="btn btn-outline" href="#manual-deploy">Manual Deployment</a>
+    </div>
+  </div>
+</section>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Prerequisites</div>
+      <ul>
+        <li><a href="#prereqs">Requirements</a></li>
+        <li><a href="#auth-prereq">Auth API</a></li>
+      </ul>
+      <div class="sidebar-section">Helm Deployment</div>
+      <ul>
+        <li><a href="#helm-deploy">Overview</a></li>
+        <li><a href="#helm-install">Add Helm Repo</a></li>
+        <li><a href="#helm-values">Configure values.yaml</a></li>
+        <li><a href="#helm-run">Install Chart</a></li>
+        <li><a href="#helm-verify">Verify</a></li>
+        <li><a href="#helm-uninstall">Uninstall</a></li>
+      </ul>
+      <div class="sidebar-section">Operations</div>
+      <ul>
+        <li><a href="#access-control">Access Control</a></li>
+        <li><a href="#ops-verify">Health Checks</a></li>
+        <li><a href="#ops-troubleshoot">Troubleshooting</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="doc-content">
+
+    <h2 id="prereqs">Prerequisites</h2>
+    <div class="grid grid-2" style="margin-bottom:1.5rem;">
+      <div class="card" style="padding:1.1rem;">
+        <h4>Kubernetes Cluster</h4>
+        <p style="font-size:.875rem;">Access to a K8s cluster with <code>kubectl</code> permissions to create namespaces, deployments, services, ClusterRoles, and ServiceAccounts.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Helm ≥ 3.10</h4>
+        <p style="font-size:.875rem;">Required for the recommended Helm deployment path. Install via <code>brew install helm</code> or the <a href="https://helm.sh/docs/intro/install/" target="_blank">official docs</a>.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Ingress Controller</h4>
+        <p style="font-size:.875rem;">An Ingress controller (e.g., <strong>nginx</strong>) must be installed in your cluster to expose the Deploy API and NDP EP API over HTTP(S).</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Authentication API</h4>
+        <p style="font-size:.875rem;">A reachable identity API endpoint that accepts Bearer tokens and returns user info (username, groups). See Auth API section below.</p>
+      </div>
+    </div>
+
+    <h2 id="auth-prereq">Authentication API</h2>
+    <p>
+      All three components authenticate users against a shared <code>AUTH_API_URL</code>.
+      This URL must accept a <code>GET</code> request with an <code>Authorization: Bearer &lt;token&gt;</code>
+      header and return a JSON body with user information including group membership.
+    </p>
+    <div class="callout callout-tip">
+      <span class="callout-icon">🧪</span>
+      <div class="callout-body">
+        <strong>Test IDP available</strong>
+        For initial testing, use the NDP test identity provider:
+        <code>https://idp-test.nationaldataplatform.org/temp/information</code>
+        — but use a production IDP for any real deployment.
+      </div>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Use the same AUTH_API_URL across all components.</strong>
+        Mixing different IDP URLs between the broker, deploy API, and ep-api will cause
+        authentication failures.
+      </div>
+    </div>
+
+    <!-- ═══════════════ HELM DEPLOY ══════════════════ -->
+    <h2 id="helm-deploy">Helm Deployment <span class="badge badge-green" style="vertical-align:middle;">Recommended</span></h2>
+    <p>
+      The <code>rexec-stack</code> Helm chart is the easiest way to deploy all three Rexec
+      server-side components. It manages three subcharts as one atomic release.
+    </p>
+
+    <div class="component-row">
+      <span class="component-pill"><span class="component-pill-dot" style="background:#3B82F6;"></span>rexec-broker</span>
+      <span style="color:var(--muted);">+</span>
+      <span class="component-pill"><span class="component-pill-dot" style="background:#10B981;"></span>rexec-server-deployment-api</span>
+      <span style="color:var(--muted);">+</span>
+      <span class="component-pill"><span class="component-pill-dot" style="background:#8B5CF6;"></span>ndp-ep-api</span>
+    </div>
+
+    <h3 id="helm-install">Add the Helm Repository</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>helm repo add rexec https://sci-ndp.github.io/rexec
+helm repo update</code></pre>
+    </div>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Verify the chart is available</span>
+helm search repo rexec</code></pre>
+    </div>
+
+    <h3 id="helm-values">Configure values.yaml</h3>
+    <p>
+      Download the annotated values template, fill in your environment-specific values,
+      then pass it to <code>helm install</code> with <code>-f my-values.yaml</code>.
+    </p>
+    <p>
+      <a href="assets/my-values.yaml"
+         download="values.yaml.template"
+         class="btn btn-blue"
+         style="display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:1em;height:1em;"><path d="M10 2a1 1 0 011 1v9.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V3a1 1 0 011-1zM3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+        Download my-values.yaml template
+      </a>
+    </p>
+
+    <p>Edit the key sections:</p>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># my-values.yaml</span>
+global:
+  <span class="cm"># ① Identity provider — must be reachable from all pods</span>
+  authApiUrl: https://idp-test.nationaldataplatform.org/temp/information
+
+  <span class="cm"># ② (Optional) Group-based access control</span>
+  enableGroupBasedAccess: true
+  groupNames: /ndp_ep/ep-&lt;your-endpoint-id&gt;
+
+rexec-broker:
+  enabled: true
+  service:
+    external:
+      clientNodePort: <span class="num">30001</span>   <span class="cm"># clients connect here</span>
+      controlNodePort: <span class="num">30002</span>   <span class="cm"># management port</span>
+
+rexec-server-deployment-api:
+  enabled: true
+  ingress:
+    enabled: true
+    className: <span class="str">nginx</span>
+    hosts:
+      - host: <span class="str">rexec.example.org</span>
+        paths:
+          - path: /rexec
+            pathType: Prefix
+  env:
+    rootPath: /rexec
+
+ndp-ep-api:
+  enabled: true
+  ingress:
+    enabled: true
+    className: <span class="str">nginx</span>
+    host: <span class="str">rexec.example.org</span>
+    path: /api
+  rootPath:
+    enabled: true
+    value: /api
+  env:
+    ORGANIZATION: <span class="str">"My University"</span>
+    EP_NAME: <span class="str">"My NDP Endpoint"</span>
+    REXEC_CONNECTION: <span class="str">True</span>
+    REXEC_DEPLOYMENT_API_URL: <span class="str">https://rexec.example.org/rexec</span></code></pre>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Full values reference</strong>
+        See the <a href="helm-chart.html">Helm Chart Reference</a> page for the complete
+        annotated values template covering all NDP EP API integrations (CKAN, MongoDB,
+        Kafka, S3, Pelican, JupyterLab).
+      </div>
+    </div>
+
+    <h3 id="helm-run">Install the Chart</h3>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Update subchart dependencies</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>helm repo update</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>(Optional) Dry-run — render manifests locally</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>helm template rexec rexec/rexec-stack \
+  -f my-values.yaml \
+  --debug</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Install or upgrade</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>helm upgrade --install rexec rexec/rexec-stack \
+  -f my-values.yaml \
+  -n rexec --create-namespace</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h3 id="helm-verify">Verify Deployment</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Check pods</span>
+kubectl get pods -n rexec
+
+<span class="cm"># Check broker NodePort services</span>
+kubectl get svc -n rexec-broker
+<span class="cm"># Expected svc:</span>
+<span class="cm"># rexec-broker-internal-ip   ClusterIP   — port 5560 (for server pods)</span>
+<span class="cm"># rexec-broker-external-ip   NodePort    — port 30001 (for clients)</span>
+
+<span class="cm"># Check Deploy API swagger UI</span>
+curl http://&lt;ingress-host&gt;/rexec/docs
+
+<span class="cm"># Check NDP EP API health</span>
+curl https://&lt;ingress-host&gt;/api/docs</code></pre>
+    </div>
+
+    <h3 id="helm-uninstall">Uninstall</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>helm uninstall rexec -n rexec</code></pre>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="access-control">Group-Based Access Control</h2>
+    <p>
+      Both the Deploy API and NDP EP API support group-based access control to restrict
+      who can create/modify rexec server instances.
+    </p>
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>How it works</strong>
+        <ol style="margin:.5rem 0 0 1rem;">
+          <li>User authenticates with Bearer token</li>
+          <li>API validates token against AUTH_API_URL and retrieves user's groups</li>
+          <li>If <code>enableGroupBasedAccess=true</code>, checks group membership</li>
+          <li>Access granted only if user's groups overlap with configured <code>groupNames</code></li>
+        </ol>
+        <p style="margin-top:.5rem; margin-bottom:0;">Group matching is <strong>case-insensitive</strong>. GET endpoints remain public.</p>
+      </div>
+    </div>
+
+    <h2 id="ops-verify">Health Checks</h2>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Broker pods</span>
+kubectl get pods -n rexec-broker
+kubectl logs -n rexec-broker deployment/rexec-broker
+
+<span class="cm"># Deploy API pods</span>
+kubectl get pods -n rexec
+kubectl logs -n rexec deployment/rexec-server-deployment-api
+
+<span class="cm"># NDP EP API</span>
+kubectl get pods -n rexec
+kubectl logs -n rexec deployment/ndp-ep-api
+
+<span class="cm"># Ingress</span>
+kubectl get ingress -n rexec</code></pre>
+    </div>
+
+    <h2 id="ops-troubleshoot">Troubleshooting</h2>
+
+    <h3>Broker NodePort not reachable from clients</h3>
+    <ul>
+      <li>Confirm the node's firewall allows inbound TCP on port <code>30001</code></li>
+      <li>Run <code>kubectl get svc -n rexec-broker</code> — ensure NodePort is <code>30001</code></li>
+      <li>Test connectivity: <code>nc -zv &lt;node-ip&gt; 30001</code></li>
+    </ul>
+
+    <h3>Deploy API returns 403</h3>
+    <ul>
+      <li>Check that <code>AUTH_API_URL</code> is reachable from inside the pod</li>
+      <li>If ACL is enabled, confirm the user belongs to a group in <code>GROUP_NAMES</code></li>
+      <li>Inspect pod logs: <code>kubectl logs -n rexec deployment/rexec-server-deployment-api</code></li>
+    </ul>
+
+    <h3>Pods not starting (ImagePullBackOff)</h3>
+    <ul>
+      <li>Verify image registry access from the cluster nodes</li>
+      <li>Check <code>kubectl describe pod &lt;pod-name&gt; -n rexec</code> for pull errors</li>
+    </ul>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.pre-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+}, { passive: true });
+</script>
+</body>
+</html>

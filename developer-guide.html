@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Guide - Remote Execution</title>
+  <meta name="description" content="Developer guide for contributing to and extending the SciDx Rexec ecosystem." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
+</head>
+<body class="page-body">
+
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="user-guide.html">User Guide</a></li>
+    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+    <li><a href="developer-guide.html" class="active">Developer</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="helm-chart.html">Helm Chart</a></li>
+    <li><a href="api-reference.html">API Reference</a></li>
+  </ul>
+  <span class="nav-version">v0.0.8</span>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank">GitHub ↗</a>
+</header>
+
+<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#0D1829 0%,#1A2B4A 60%,#0D2D6E 100%);">
+  <div class="hero-inner">
+    <div class="hero-badge">Rexec Developer</div>
+    <h1>Developer Guide</h1>
+    <p>Set up a local development stack, understand the codebase structure, and contribute to the SciDx Rexec ecosystem.</p>
+  </div>
+</section>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Repositories</div>
+      <ul>
+        <li><a href="#source-repos">Source Repos</a></li>
+        <li><a href="#repo-map">Repository Map</a></li>
+      </ul>
+      <div class="sidebar-section">Local Dev</div>
+      <ul>
+        <li><a href="#dev-prereqs">Dev Prerequisites</a></li>
+        <li><a href="#ep-lib-dev">ep-lib editable install</a></li>
+        <li><a href="#rexec-lib-dev">rexec-lib editable install</a></li>
+        <li><a href="#direct-lib-testing">Test scidx-rexec directly</a></li>
+      </ul>
+      <div class="sidebar-section">Internals</div>
+      <ul>
+        <li><a href="#zmq-protocol">ZeroMQ Protocol</a></li>
+        <li><a href="#server-lifecycle">Server Lifecycle</a></li>
+        <li><a href="#auth-flow">Auth Flow</a></li>
+      </ul>
+      <div class="sidebar-section">Contributing</div>
+      <ul>
+        <li><a href="#contributing">Guidelines</a></li>
+        <li><a href="#release">Release Process</a></li>
+        <li><a href="#helm-dev">Helm Chart Dev</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="doc-content">
+
+    <h2 id="source-repos">Source Repositories</h2>
+    <p>The Rexec ecosystem is spread across four GitHub repositories. Each has a distinct responsibility:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Repo</th><th>Role</th><th>Language</th><th>Link</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>ndp-ep-py</td>
+            <td>NDP Endpoint Python client library. High-level interface users interact with; pulls in <code>scidx-rexec</code> as an extra.</td>
+            <td>Python</td>
+            <td><a href="https://github.com/sci-ndp/ndp-ep-py" target="_blank">sci-ndp/ndp-ep-py ↗</a></td>
+          </tr>
+          <tr>
+            <td>SciDx-rexec</td>
+            <td>The rexec client library. Handles ZeroMQ connection to broker, serialization, and job dispatch.</td>
+            <td>Python</td>
+            <td><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">sci-ndp/SciDx-rexec ↗</a></td>
+          </tr>
+          <tr>
+            <td>SciDx-rexec-server</td>
+            <td>The per-user rexec server pod. Connects to the broker as a worker and executes dispatched functions.</td>
+            <td>Python</td>
+            <td><a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">sci-ndp/SciDx-rexec-server ↗</a></td>
+          </tr>
+          <tr>
+            <td>SciDx-rexec-broker</td>
+            <td>The ZeroMQ message broker. Routes messages between many clients and many server pods.</td>
+            <td>Python / K8s</td>
+            <td><a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">sci-ndp/SciDx-rexec-broker ↗</a></td>
+          </tr>
+          <tr>
+            <td>rexec-server-k8s-deployment-api</td>
+            <td>FastAPI service that provisions/destroys rexec-server pods in Kubernetes on demand.</td>
+            <td>Python / FastAPI</td>
+            <td><a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">sci-ndp/rexec-server-k8s-deployment-api ↗</a></td>
+          </tr>
+          <tr>
+            <td>ep-api</td>
+            <td>NDP Endpoint API (FastAPI). Provides dataset catalog, auth integration, and Rexec spawn API address.</td>
+            <td>Python / FastAPI</td>
+            <td><a href="https://github.com/national-data-platform/ep-api" target="_blank">national-data-platform/ep-api ↗</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="repo-map">Repository Map</h2>
+    <p>This meta-repo (<code>sci-ndp/rexec</code>) contains documentation, helm charts, and user notebooks. It does <em>not</em> contain source code for any of the runtime components.</p>
+
+    <div class="pre-wrap" style="margin:0;">
+      <pre><code>sci-ndp/rexec/              <span class="cm"># this repo — docs, helm, examples</span>
+├── helm/
+│   └── rexec/              <span class="cm"># umbrella Helm chart</span>
+│       ├── Chart.yaml
+│       ├── values.yaml.template
+│       ├── scidx-rexec-broker/
+│       ├── scidx-rexec-server-deploy-api/
+│       └── ndp-ep-api/
+├── user/
+│   ├── ndp-ep-rexec.ipynb  <span class="cm"># NDP EP + rexec example</span>
+│   └── direct-rexec-lib.ipynb
+├── reference/
+│   ├── svg/                <span class="cm"># architecture diagrams</span>
+│   └── legacy-doc/         <span class="cm"># manual deploy docs</span>
+└── docs/                   <span class="cm"># this GitHub Pages site</span></code></pre>
+    </div>
+
+    <h2 id="dev-prereqs">Dev Prerequisites</h2>
+    <ul>
+      <li>Python 3.9+ (3.11 recommended)</li>
+      <li><code>git</code></li>
+      <li>A ZeroMQ-capable environment (standard on macOS/Linux)</li>
+      <li>Docker + Docker Compose (for broker / deploy API local runs)</li>
+      <li>Access to a Kubernetes cluster (optional, for end-to-end testing)</li>
+    </ul>
+
+    <h2 id="ep-lib-dev">Path A — Develop the NDP EP Library (editable)</h2>
+    <p>
+      Use this path when you're working on <code>ndp-ep-py</code>. The <code>scidx-rexec</code>
+      library is pulled in from PyPI as a normal dependency.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Clone ndp-ep-py</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>git clone https://github.com/sci-ndp/ndp-ep-py.git
+cd ndp-ep-py</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Install in editable mode with rexec extra</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>pip install -e ".[rexec]"</code></pre>
+          </div>
+          <p>This installs <code>ndp-ep-py</code> from source (editable) and pulls <code>scidx-rexec</code> from PyPI.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="rexec-lib-dev">Path B — Develop the Rexec Client Library (editable)</h2>
+    <p>
+      Use this path when you're working on <code>SciDx-rexec</code> itself.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Clone SciDx-rexec</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>git clone https://github.com/sci-ndp/SciDx-rexec.git
+cd SciDx-rexec</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Install in editable mode</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>pip install -e .</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>(Optional) Also install ndp-ep-py in editable mode</h4>
+          <p>If you need to work on both layers simultaneously:</p>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code><span class="cm"># In a separate directory:</span>
+git clone https://github.com/sci-ndp/ndp-ep-py.git
+cd ndp-ep-py
+pip install -e ".[rexec]"
+<span class="cm"># pip will use your local editable scidx-rexec since it's already installed</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="direct-lib-testing">Testing scidx-rexec Directly</h2>
+    <p>
+      When contributing to or debugging <code>SciDx-rexec</code>, you can bypass the NDP
+      Endpoint layer entirely and drive the library directly with <code>remote_func</code>.
+      This is the fastest way to iterate on the client library in isolation.
+    </p>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Prerequisites</strong>
+        You need a running broker and deploy API reachable from your machine — either a
+        local <code>kind</code> cluster (see <a href="#helm-dev">Helm Chart Dev</a>) or
+        a shared dev environment. The notebook
+        <a href="https://github.com/sci-ndp/rexec/blob/main/user/direct-rexec-lib.ipynb" target="_blank">direct-rexec-lib.ipynb</a>
+        also demonstrates this pattern.
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Install your editable build</h4>
+          <p>Follow <a href="#rexec-lib-dev">Path B</a> above to install <code>scidx-rexec</code> in editable mode first.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Configure and call <code>remote_func</code></h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code><span class="kw">from</span> rexec.client_api <span class="kw">import</span> remote_func
+
+token = <span class="str">"&lt;user-token&gt;"</span>
+
+<span class="cm"># Point directly at the broker</span>
+remote_func().set_remote_addr(<span class="str">"&lt;example.broker.addr&gt;"</span>)
+remote_func().set_remote_port(<span class="str">"5559"</span>)
+remote_func().set_exec_token(token)
+
+<span class="cm"># Point at the deploy API to auto-provision a server pod</span>
+remote_func().set_api_url(<span class="str">"http://example.deploy.api.addr/rexec/spawn"</span>)
+remote_func().set_environment(<span class="str">"input_requirements.txt"</span>, token)
+
+@remote_func
+<span class="kw">def</span> my_fn():
+    <span class="kw">import</span> platform
+    <span class="kw">return</span> platform.node()
+
+result = my_fn()
+print(result)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Server pod not auto-provisioned via NDP EP</strong>
+        When calling <code>remote_func</code> directly, <code>set_api_url</code> triggers
+        the deploy API to spawn a server pod on demand. If you skip it, a server pod must
+        already be connected to the broker before your call.
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="zmq-protocol">ZeroMQ Protocol</h2>
+    <p>
+      Rexec uses a <strong>ROUTER–DEALER</strong> ZeroMQ pattern at the broker:
+    </p>
+    <div class="pre-wrap">
+      <pre><code>Client (DEALER) ──→ Broker frontend (ROUTER)
+                         │
+                    [routing table]
+                         │
+Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
+    </div>
+    <ul>
+      <li>Clients connect to the <strong>external NodePort</strong> (<code>30001</code>) as DEALER sockets</li>
+      <li>Server pods connect to the <strong>internal ClusterIP</strong> (<code>5560</code>) as DEALER sockets</li>
+      <li>The broker is stateless — it forwards frames based on identity routing</li>
+      <li>Authentication is validated at the connection handshake via token</li>
+    </ul>
+
+    <h2 id="server-lifecycle">Server Pod Lifecycle</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Client requests a server</h4>
+          <p>Client calls the NDP EP API spawn endpoint with their Bearer token. The EP API forwards the request to the Deploy API.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Deploy API provisions a pod</h4>
+          <p>Deploy API creates a new namespace (<code>rexec-server-&lt;user&gt;</code>) and deploys a <code>rexec-server</code> pod. The pod automatically connects to the broker's internal ClusterIP.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Client dispatches jobs</h4>
+          <p>Client sends serialized function calls through the broker. The broker routes them to the user's dedicated server pod.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Session ends / cleanup</h4>
+          <p>When the session is complete or times out, the Deploy API tears down the pod and namespace.</p>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="auth-flow">Authentication Flow</h2>
+    <div class="pre-wrap">
+      <pre><code>Client                   NDP EP API              AUTH_API_URL
+  │                          │                         │
+  │── GET /api/rexec/spawn ──▶│                         │
+  │   Authorization: Bearer  │── GET &lt;AUTH_API_URL&gt; ──▶│
+  │                          │   Authorization: Bearer  │
+  │                          │◀── {username, groups} ───│
+  │                          │                         │
+  │      (if ACL enabled)    │
+  │                          │── check groups ──▶ [allow/deny]
+  │                          │
+  │◀── {broker_url, ...} ────│
+  │                          │
+  │── ZMQ DEALER connect ──▶ [Broker]
+  │   token in handshake     │── validate token ──▶ AUTH_API_URL</code></pre>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="contributing">Contributing Guidelines</h2>
+    <div class="callout callout-info">
+      <span class="callout-icon">📋</span>
+      <div class="callout-body">
+        <strong>Before opening a PR</strong>
+        <ul style="margin:.5rem 0 0 1rem;">
+          <li>Open an issue to discuss the change first for non-trivial features</li>
+          <li>Fork the relevant repo and create a feature branch from <code>main</code></li>
+          <li>Ensure tests pass and add tests for new behaviour</li>
+          <li>Keep PRs focused — one feature/fix per PR</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Client Library and Server Repos</h3>
+    <p>
+      For <strong>scidx-rexec</strong> (client library) and the <strong>rexec server</strong> repo,
+      follow the standard PR process — open a pull request against <code>main</code>, and a rexec admin
+      will review and merge accordingly. PyPI releases for the client library are managed exclusively
+      by the rexec admin team; contributors do not need to handle publishing.
+    </p>
+
+    <h3>Docker Image CI: Broker and Server Deploy API</h3>
+    <p>
+      The <strong>broker</strong> and <strong>server-deploy-api</strong> repos each have a GitHub Actions
+      workflow that fires on every merge to <code>main</code>. It builds the Docker image and pushes it to
+      Docker Hub under the <code>latest</code> tag automatically.
+    </p>
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Helm chart always pulls the latest image</strong>
+        The chart sets <code>imagePullPolicy: Always</code> for both components, so a running cluster will
+        pick up the new <code>latest</code> image on the next pod restart or rolling update; thus, no subchart
+        version bump needed.
+      </div>
+    </div>
+
+    <h3>Commit Style</h3>
+    <p>Follow <a href="https://www.conventionalcommits.org/" target="_blank">Conventional Commits</a>:</p>
+    <div class="pre-wrap">
+      <pre><code>feat: add async job dispatch to rexec client
+fix: handle ZMQ timeout on broker disconnect
+docs: add deploy API auth flow diagram
+chore: bump scidx-rexec dependency to 0.2.0</code></pre>
+    </div>
+
+    <h2 id="release">Release Process (Helm Chart)</h2>
+    <p>
+      The Helm chart is released automatically via the
+      <code>release-charts.yaml</code> GitHub Actions workflow using
+      <a href="https://github.com/helm/chart-releaser-action" target="_blank">helm/chart-releaser-action</a>.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Bump the chart version</h4>
+          <p>Edit <code>helm/rexec/Chart.yaml</code> and increment <code>version</code> (semver).</p>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code><span class="cm"># helm/rexec/Chart.yaml</span>
+version: 0.1.2    <span class="cm"># ← increment this</span>
+appVersion: "0.1.0"</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Push to main</h4>
+          <p>The workflow triggers on any push to <code>main</code> that changes files under <code>helm/**</code>.</p>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>git add helm/rexec/Chart.yaml
+git commit -m "chore: bump chart to 0.1.2"
+git push origin main</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>chart-releaser publishes automatically</h4>
+          <p>
+            The action packages the chart as a <code>.tgz</code>, creates a GitHub Release,
+            and updates <code>index.yaml</code> on the <code>gh-pages</code> branch.
+            GitHub Pages serves the Helm repo index from there.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="helm-dev">Local Helm Chart Development</h2>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Update subcharts</span>
+helm dependency update ./helm/rexec
+
+<span class="cm"># Lint</span>
+helm lint ./helm/rexec
+
+<span class="cm"># Template render (dry-run)</span>
+helm template rexec ./helm/rexec \
+  -f ./helm/rexec/values.yaml \
+  --debug
+
+<span class="cm"># Install to a local cluster (e.g., kind or minikube)</span>
+helm upgrade --install rexec ./helm/rexec \
+  -f ./helm/rexec/values.yaml \
+  -n rexec --create-namespace</code></pre>
+    </div>
+
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>kind cluster for local testing</strong>
+        <div class="pre-wrap" style="margin-top:.5rem; margin-bottom:0;">
+          <pre style="font-size:.8rem;"><code>kind create cluster --name rexec-dev
+kubectl config use-context kind-rexec-dev
+helm upgrade --install rexec ./helm/rexec -f ./helm/rexec/values.yaml -n rexec --create-namespace</code></pre>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.pre-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+}, { passive: true });
+</script>
+</body>
+</html>
