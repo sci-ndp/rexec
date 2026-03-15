@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Guide - Remote Execution</title>
+  <meta name="description" content="End user guide for running remote jobs via NDP Endpoint and the Rexec library." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
+</head>
+<body class="page-body">
+
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="user-guide.html" class="active">User Guide</a></li>
+    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+    <li><a href="developer-guide.html">Developer</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="helm-chart.html">Helm Chart</a></li>
+    <li><a href="api-reference.html">API Reference</a></li>
+  </ul>
+  <span class="nav-version">v0.1.1</span>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank">GitHub ↗</a>
+</header>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
+  <div class="hero-inner">
+    <div class="hero-badge">Scientists</div>
+    <h1>User Guide</h1>
+    <p>Run Python code on remote HPC/cloud clusters from your local Jupyter Notebook — no infrastructure knowledge required.</p>
+  </div>
+</section>
+
+<!-- ── Doc layout ────────────────────────────────────────────── -->
+<div class="doc-layout">
+
+  <!-- Sidebar -->
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Getting Started</div>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#what-you-need">What You Need</a></li>
+      </ul>
+      <div class="sidebar-section">Usage</div>
+      <ul>
+        <li><a href="#via-ndp-endpoint">Via NDP Endpoint</a></li>
+        <li><a href="#notebooks">Example Notebooks</a></li>
+      </ul>
+      <div class="sidebar-section">Reference</div>
+      <ul>
+        <li><a href="#auth">Authentication</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Content -->
+  <main class="doc-content">
+
+    <h2 id="prerequisites">Prerequisites</h2>
+    <p>Before you begin, ensure you have the following:</p>
+    <div class="grid grid-2" style="margin-bottom:1.5rem;">
+      <div class="card" style="padding:1.1rem;">
+        <h4>Python ≥ 3.9</h4>
+        <p style="font-size:.875rem;">Required to install and run the <code>ndp_ep</code> library.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Bearer Token</h4>
+        <p style="font-size:.875rem;">An NDP identity token to authenticate against the NDP Endpoint. Obtain one from your NDP Endpoint provider.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>NDP Endpoint URL</h4>
+        <p style="font-size:.875rem;">The URL of an NDP Endpoint instance that has Rexec enabled. Your sysadmin provides this.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Jupyter (optional)</h4>
+        <p style="font-size:.875rem;">Recommended for interactive use. Any Jupyter Notebook environment works (local, JupyterHub, VS Code).</p>
+      </div>
+    </div>
+
+    <h2 id="installation">Installation</h2>
+    <p>
+      The recommended path is installing <strong>ndp_ep</strong> with the <code>rexec</code> extra,
+      which pulls in both the NDP Endpoint client and the SciDx-rexec library as a dependency.
+    </p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(event,'tab-bash')">bash</button>
+      <button class="tab-btn" onclick="switchTab(event,'tab-zsh')">zsh</button>
+      <button class="tab-btn" onclick="switchTab(event,'tab-conda')">conda env</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-bash">
+      <div class="pre-wrap">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>pip install ndp_ep[rexec]</code></pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-zsh">
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body">
+          <strong>zsh glob expansion</strong>
+          In zsh, square brackets are interpreted as glob patterns. Wrap extras in double quotes.
+        </div>
+      </div>
+      <div class="pre-wrap">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code>pip install "ndp_ep[rexec]"</code></pre>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-conda">
+      <div class="pre-wrap">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code><span class="cm"># Create and activate a fresh environment first</span>
+conda create -n rexec-env python=3.11 -y
+conda activate rexec-env
+pip install "ndp_ep[rexec]"</code></pre>
+      </div>
+    </div>
+
+    <div class="callout callout-info" style="margin-top:.5rem;">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>What gets installed</strong>
+        <code>ndp_ep</code> (the NDP Endpoint Python client) and <code>scidx-rexec</code>
+        (the Rexec client library, pulled in as a dependency).
+      </div>
+    </div>
+
+    <h3>Verify installation</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>python -c "import ndp_ep; print('ndp_ep OK'); import rexec; print('rexec OK')"</code></pre>
+    </div>
+
+    <h2 id="what-you-need">What You Need From Your Sysadmin</h2>
+    <div class="callout callout-tip">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        Before running jobs, ask your NDP Endpoint Provider (sysadmin) for:
+        <ul style="margin:.4rem 0 0; padding-left:1.2rem;">
+          <li>The <strong>Endpoint URL</strong> (e.g. <code>https://ndp-endpoint.example.org/api</code>)</li>
+          <li>Your <strong>Bearer token</strong> (obtained from the identity provider)</li>
+          <li>Confirmation that <strong>Rexec is enabled</strong> on the endpoint (<code>REXEC_CONNECTION=True</code>)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 id="via-ndp-endpoint">Using Rexec via NDP Endpoint</h2>
+    <p>
+      The primary way to use Rexec is through the <code>ndp_ep</code> library, which orchestrates
+      authentication, server provisioning, and job dispatch in one place.
+    </p>
+
+    <h3>Connect to an Endpoint</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="kw">from</span> ndp_ep <span class="kw">import</span> APIClient, remote_func
+
+ndp_ep_client = APIClient(
+    base_url=<span class="str">"https://ndp-endpoint.example.org/api"</span>,
+    token=<span class="str">"&lt;your-bearer-token&gt;"</span>
+)</code></pre>
+    </div>
+
+    <h3>Provision the Remote Environment(rexec server)</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>ndp_ep_client.setup_rexec_environment( requirements=<span class="str">"input_requirements.txt"</span> )</code></pre>
+    </div>
+
+    <h3>Define and Send a Remote Function</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+
+      <pre><code><span class="decorator">@remote_func</span>
+<span class="kw">def</span> compute_pi(n: int) -> float:
+    <span class="str">"""Estimate pi using Leibniz series."""</span>
+    pi = <span class="num">0.0</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(n):
+        pi += (-<span class="num">1</span>)**i / (<span class="num">2</span>*i + <span class="num">1</span>)
+    <span class="kw">return</span> <span class="num">4</span> * pi
+
+<span class="cm"># Simply invoke the function, it serialized the wrapped func and send it to remote Rexec server</span>
+result = compute_pi(n=<span class="num">10000000</span>)
+print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
+    </div>
+
+    <h2 id="notebooks" style="scroll-margin-top: 80px;">Example Notebooks</h2>
+    <p>Two example notebooks are included in the repository to help you get started:</p>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-icon" style="background:#EEF4FF;color:var(--blue);">📓</div>
+        <h4><code>ndp-ep-rexec.ipynb</code></h4>
+        <p>
+          The recommended starting point. Walks through connecting to an NDP Endpoint,
+          authenticating, and submitting jobs using the <code>ndp_ep</code> library.
+        </p>
+        <div style="margin-top:.75rem;">
+          <a href="https://github.com/sci-ndp/rexec/blob/main/user/ndp-ep-rexec.ipynb" target="_blank" class="btn btn-blue" style="font-size:.8rem; padding:.35rem .9rem;">View on GitHub ↗</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon" style="background:#ECFDF5;color:#065F46;">📓</div>
+        <h4><code>direct-rexec-lib.ipynb</code></h4>
+        <p>
+          Shows how to use the <code>scidx-rexec</code> client library <em>directly</em>,
+          without the NDP Endpoint orchestration layer. Useful for custom integrations.
+        </p>
+        <div style="margin-top:.75rem;">
+          <a href="https://github.com/sci-ndp/rexec/blob/main/user/direct-rexec-lib.ipynb" target="_blank" class="btn btn-blue" style="font-size:.8rem; padding:.35rem .9rem; background:#065F46;">View on GitHub ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-tip" style="margin-top:1.5rem;">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Open in Jupyter</strong>
+        Download the notebooks and open it locally:
+        <code>jupyter notebook ndp-ep-rexec.ipynb</code>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">💡</span>
+      <div class="callout-body">
+        <strong>Contributing or testing the rexec library directly?</strong>
+        See the <a href="developer-guide.html#direct-lib-testing">Developer Guide → Testing scidx-rexec directly</a>
+        for how to use <code>remote_func</code> without the NDP Endpoint layer.
+      </div>
+    </div>
+
+    <h2 id="auth">Authentication</h2>
+    <p>
+      All requests are authenticated via <strong>Bearer tokens</strong>. The NDP identity
+      provider issues these tokens. The token is validated by the broker, deploy API, and
+      NDP Endpoint API, all using the same <code>AUTH_API_URL</code>.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Component</th><th>How Auth is Used</th></tr></thead>
+        <tbody>
+          <tr><td>Rexec Broker</td><td>Validates token before routing messages</td></tr>
+          <tr><td>Deploy API</td><td>Validates token; checks group membership if ACL enabled</td></tr>
+          <tr><td>NDP EP API</td><td>Validates token; returns Rexec spawn API URL to client</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-info" style="margin-top:1rem;">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Test token</strong>
+        For initial testing you can use the test IDP at
+        <code>https://idp-test.nationaldataplatform.org/temp/information</code>.
+        Ask your sysadmin whether the endpoint uses the production or test IDP.
+      </div>
+    </div>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+
+    <h3>Connection timeout</h3>
+    <p>
+      If <code>remote func invocation</code> hangs or times out, check that:
+    </p>
+    <ul>
+      <li>The Rexec broker NodePort (<code>30001</code>) is reachable from your network</li>
+      <li>Your token is valid and not expired</li>
+      <li>The NDP Endpoint has <code>REXEC_CONNECTION=True</code> in its configuration</li>
+    </ul>
+
+    <h3>ModuleNotFoundError: scidx_rexec</h3>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>pip install "ndp_ep[rexec]"  <span class="cm"># re-install with the rexec extra</span></code></pre>
+    </div>
+
+    <h3>zsh: no matches found: ndp_ep[rexec]</h3>
+    <p>Wrap the package name in double quotes so zsh doesn't interpret the brackets as globs:</p>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>pip install <span class="str">"ndp_ep[rexec]"</span></code></pre>
+    </div>
+
+    <h3>Authentication error (401 / 403)</h3>
+    <ul>
+      <li>Ensure your token hasn't expired — obtain a fresh token from your identity provider</li>
+      <li>If using group-based access: confirm your account belongs to the configured group</li>
+    </ul>
+
+    <h2 id="faq">FAQ</h2>
+
+    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
+      <summary style="font-weight:600; cursor:pointer;">Do I need to manage the server pod myself?</summary>
+      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
+        No. When using the NDP Endpoint path, the Deploy API automatically provisions and tears
+        down a dedicated server pod for your session. You never interact with Kubernetes directly.
+      </p>
+    </details>
+
+    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
+      <summary style="font-weight:600; cursor:pointer;">Can I use Rexec from a plain Python script (not a notebook)?</summary>
+      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
+        Yes. <code>ndp_ep</code> and <code>scidx-rexec</code> are plain Python libraries
+        and work in any Python environment — scripts, notebooks, or CI pipelines.
+      </p>
+    </details>
+
+    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
+      <summary style="font-weight:600; cursor:pointer;">What Python packages are available on the remote server?</summary>
+      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
+        This depends on the container image configured by your sysadmin for the rexec-server pods.
+        Ask your NDP Endpoint Provider which images and pre-installed packages are available.
+      </p>
+    </details>
+
+    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
+      <summary style="font-weight:600; cursor:pointer;">Is my code sent over the network unencrypted?</summary>
+      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
+        The ZeroMQ transport between client and broker is token-authenticated. Whether TLS
+        is applied depends on the broker's NodePort configuration. For production deployments,
+        sysadmins should terminate TLS at the Ingress or use a secure tunnel.
+      </p>
+    </details>
+
+  </main>
+</div><!-- /.doc-layout -->
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+function switchTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function copyCode(btn) {
+  const pre = btn.closest('.pre-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+// Sidebar active link highlight on scroll
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>

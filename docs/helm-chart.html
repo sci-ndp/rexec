@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Helm Chart Reference - Remote Execution</title>
+  <meta name="description" content="Helm chart reference for the rexec-stack chart. Covers repository setup, values reference, and subchart configuration." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
+</head>
+<body class="page-body">
+
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="user-guide.html">User Guide</a></li>
+    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+    <li><a href="developer-guide.html">Developer</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="helm-chart.html" class="active">Helm Chart</a></li>
+    <li><a href="api-reference.html">API Reference</a></li>
+  </ul>
+  <span class="nav-version">v0.0.8</span>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank">GitHub ↗</a>
+</header>
+
+<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#001642 0%,#0D2D6E 50%,#1A2B4A 100%);">
+  <div class="hero-inner">
+    <div class="hero-badge">Helm Chart</div>
+    <h1>R-Exec Helm Chart</h1>
+    <p>
+      The <code>rexec-stack</code> chart deploys the full Rexec server-side stack — broker,
+      deploy API, and NDP Endpoint API — as a single Helm release with three managed subcharts.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#quickstart">Quick Install</a>
+      <a class="btn btn-outline" href="#values-global">Values Reference</a>
+    </div>
+  </div>
+</section>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Getting Started</div>
+      <ul>
+        <li><a href="#quickstart">Quick Install</a></li>
+        <li><a href="#chart-info">Chart Info</a></li>
+        <li><a href="#subcharts">Subcharts</a></li>
+      </ul>
+      <div class="sidebar-section">Values Reference</div>
+      <ul>
+        <li><a href="#values-global">global.*</a></li>
+        <li><a href="#values-broker">rexec-broker.*</a></li>
+        <li><a href="#values-deploy-api">rexec-server-deployment-api.*</a></li>
+        <li><a href="#values-ep-api">ndp-ep-api.*</a></li>
+        <li><a href="#values-ep-env">ndp-ep-api.env.*</a></li>
+      </ul>
+      <div class="sidebar-section">Operations</div>
+      <ul>
+        <li><a href="#upgrade">Upgrade</a></li>
+        <li><a href="#uninstall">Uninstall</a></li>
+        <li><a href="#debug">Debugging</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="doc-content">
+
+    <h2 id="quickstart">Quick Install</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>Add the Helm repo</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>helm repo add rexec https://sci-ndp.github.io/rexec
+helm repo update</code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Download the values template</h4>
+          <p style="margin:.4rem 0 .75rem;">Download the annotated template, fill in your values, then pass it to <code>helm install</code>.</p>
+          <a href="assets/my-values.yaml"
+             download="my-values.yaml"
+             class="btn btn-blue"
+             style="display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;">
+            <svg viewBox="0 0 20 20" fill="currentColor" style="width:1em;height:1em;"><path d="M10 2a1 1 0 011 1v9.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V3a1 1 0 011-1zM3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/></svg>
+            Download my-values.yaml template 
+          </a>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Edit <code>my-values.yaml</code> — minimum required fields</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>global:
+  authApiUrl: <span class="str">https://idp-test.nationaldataplatform.org/temp/information</span>
+
+rexec-server-deployment-api:
+  ingress:
+    hosts:
+      - host: <span class="str">your-domain.example.org</span>
+        paths: [{path: /rexec, pathType: Prefix}]
+
+ndp-ep-api:
+  ingress:
+    host: <span class="str">your-domain.example.org</span>
+  env:
+    ORGANIZATION: <span class="str">"Your Organization"</span>
+    EP_NAME: <span class="str">"Your Endpoint Name"</span>
+    REXEC_CONNECTION: <span class="str">True</span>
+    REXEC_DEPLOYMENT_API_URL: <span class="str">https://your-domain.example.org/rexec</span></code></pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h4>Install</h4>
+          <div class="pre-wrap">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <pre><code>helm upgrade --install rexec rexec/rexec-stack \
+  -f my-values.yaml \
+  -n rexec --create-namespace</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="chart-info">Chart Information</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Field</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>name</td><td>rexec-stack</td></tr>
+          <tr><td>version</td><td>0.1.1</td></tr>
+          <tr><td>appVersion</td><td>0.1.0</td></tr>
+          <tr><td>apiVersion</td><td>v2</td></tr>
+          <tr><td>type</td><td>application</td></tr>
+          <tr><td>repo URL</td><td>https://sci-ndp.github.io/rexec</td></tr>
+          <tr><td>source</td><td><a href="https://github.com/sci-ndp/rexec/tree/main/helm/rexec" target="_blank">helm/rexec/ ↗</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="subcharts">Subcharts</h2>
+    <p>The umbrella chart manages three subcharts. Each can be independently enabled or disabled.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Subchart name</th><th>Alias</th><th>Enable key</th><th>Version</th></tr></thead>
+        <tbody>
+          <tr><td>rexec-broker</td><td>—</td><td><code>rexec-broker.enabled</code></td><td>0.1.0</td></tr>
+          <tr><td>rexec-server-deployment-api</td><td>rexec-server-deployment-api</td><td><code>rexec-server-deployment-api.enabled</code></td><td>0.1.0</td></tr>
+          <tr><td>ndp-ep-api</td><td>ndp-ep-api</td><td><code>ndp-ep-api.enabled</code></td><td>0.1.0</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="values-global">Values: <code>global.*</code></h2>
+    <p>Global values are passed down to all subcharts.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>global.authApiUrl</td><td><code>https://idp-test…</code></td><td>Identity provider URL used by all three components to validate Bearer tokens.</td></tr>
+          <tr><td>global.enableGroupBasedAccess</td><td><code>false</code></td><td>Enable group-based ACL on write operations (Deploy API + NDP EP API).</td></tr>
+          <tr><td>global.groupNames</td><td><code>/ndp_ep/ep-***</code></td><td>Comma-separated allowed group names. Only used when ACL is enabled.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="values-broker">Values: <code>rexec-broker.*</code></h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>rexec-broker.enabled</td><td><code>true</code></td><td>Deploy the broker subchart.</td></tr>
+          <tr><td>rexec-broker.replicaCount</td><td><code>1</code></td><td>Number of broker pod replicas.</td></tr>
+          <tr><td>rexec-broker.service.external.clientNodePort</td><td><code>30001</code></td><td>NodePort for client ZMQ connections.</td></tr>
+          <tr><td>rexec-broker.service.external.controlNodePort</td><td><code>30002</code></td><td>NodePort for control/management.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="values-deploy-api">Values: <code>rexec-server-deployment-api.*</code></h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>…enabled</td><td><code>true</code></td><td>Deploy the server deployment API subchart.</td></tr>
+          <tr><td>…ingress.enabled</td><td><code>true</code></td><td>Create an Ingress resource.</td></tr>
+          <tr><td>…ingress.className</td><td><code>""</code></td><td>Ingress class (e.g., <code>nginx</code>).</td></tr>
+          <tr><td>…ingress.hosts[].host</td><td><code>""</code></td><td>Hostname for the Ingress rule.</td></tr>
+          <tr><td>…ingress.hosts[].paths[].path</td><td><code>/rexec</code></td><td>URL path prefix.</td></tr>
+          <tr><td>…env.rexecServerNamespacePrefix</td><td><code>rexec-server-</code></td><td>Namespace prefix for spawned server pods.</td></tr>
+          <tr><td>…env.rootPath</td><td><code>/rexec</code></td><td>FastAPI root path (must match ingress path).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="values-ep-api">Values: <code>ndp-ep-api.*</code></h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>ndp-ep-api.enabled</td><td><code>true</code></td><td>Deploy the NDP Endpoint API subchart.</td></tr>
+          <tr><td>ndp-ep-api.resources.limits.memory</td><td><code>512Mi</code></td><td>Memory limit for the EP API pod.</td></tr>
+          <tr><td>ndp-ep-api.resources.limits.cpu</td><td><code>500m</code></td><td>CPU limit.</td></tr>
+          <tr><td>ndp-ep-api.resources.requests.memory</td><td><code>256Mi</code></td><td>Memory request.</td></tr>
+          <tr><td>ndp-ep-api.resources.requests.cpu</td><td><code>250m</code></td><td>CPU request.</td></tr>
+          <tr><td>ndp-ep-api.ingress.enabled</td><td><code>true</code></td><td>Create an Ingress resource.</td></tr>
+          <tr><td>ndp-ep-api.ingress.className</td><td><code>""</code></td><td>Ingress class.</td></tr>
+          <tr><td>ndp-ep-api.ingress.host</td><td><code>""</code></td><td>Hostname.</td></tr>
+          <tr><td>ndp-ep-api.ingress.path</td><td><code>/api</code></td><td>URL path prefix.</td></tr>
+          <tr><td>ndp-ep-api.rootPath.enabled</td><td><code>true</code></td><td>Enable FastAPI root_path (must match ingress path).</td></tr>
+          <tr><td>ndp-ep-api.rootPath.value</td><td><code>/api</code></td><td>FastAPI root_path value.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="values-ep-env">Values: <code>ndp-ep-api.env.*</code></h2>
+    <p>These map directly to environment variables for the NDP Endpoint API container.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(event,'env-org')">Organization</button>
+      <button class="tab-btn" onclick="switchTab(event,'env-catalog')">Catalog</button>
+      <button class="tab-btn" onclick="switchTab(event,'env-rexec')">Rexec</button>
+      <button class="tab-btn" onclick="switchTab(event,'env-integrations')">Integrations</button>
+    </div>
+
+    <div class="tab-panel active" id="env-org">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Required</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>ORGANIZATION</td><td><span class="badge badge-navy">Required</span></td><td>Your organization name displayed in the endpoint metadata.</td></tr>
+            <tr><td>EP_NAME</td><td><span class="badge badge-navy">Required</span></td><td>Your endpoint's human-readable name.</td></tr>
+            <tr><td>METRICS_INTERVAL_SECONDS</td><td><span class="badge badge-blue">Optional</span></td><td>Interval for metrics reporting (default: <code>3300</code>).</td></tr>
+            <tr><td>METRICS_ENDPOINT</td><td><span class="badge badge-blue">Optional</span></td><td>Federation metrics collection URL.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="env-catalog">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>LOCAL_CATALOG_BACKEND</td><td><code>ckan</code></td><td><code>ckan</code> or <code>mongodb</code> — backend for local dataset catalog.</td></tr>
+            <tr><td>CKAN_LOCAL_ENABLED</td><td><code>False</code></td><td>Enable write operations (POST/PUT/DELETE) to local catalog.</td></tr>
+            <tr><td>CKAN_URL</td><td><code>""</code></td><td>Your CKAN instance URL (only for CKAN backend).</td></tr>
+            <tr><td>CKAN_API_KEY</td><td><code>""</code></td><td>CKAN API key for authentication.</td></tr>
+            <tr><td>MONGODB_CONNECTION_STRING</td><td><code>mongodb://admin:…</code></td><td>MongoDB connection string (only for MongoDB backend).</td></tr>
+            <tr><td>MONGODB_DATABASE</td><td><code>ndp_local_catalog</code></td><td>MongoDB database name.</td></tr>
+            <tr><td>PRE_CKAN_ENABLED</td><td><code>False</code></td><td>Enable Pre-CKAN instance access.</td></tr>
+            <tr><td>PRE_CKAN_URL</td><td><code>""</code></td><td>Pre-CKAN URL.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="env-rexec">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>REXEC_CONNECTION</td><td><code>True</code></td><td>Enable Rexec integration. Set to <code>True</code> to enable remote execution.</td></tr>
+            <tr><td>REXEC_DEPLOYMENT_API_URL</td><td><code>""</code></td><td>Public URL of the Rexec Deploy API (the <code>/rexec</code> ingress endpoint).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="env-integrations">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Default</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td>KAFKA_CONNECTION</td><td><code>False</code></td><td>Enable Kafka streaming support.</td></tr>
+            <tr><td>KAFKA_HOST</td><td><code>""</code></td><td>Kafka broker hostname.</td></tr>
+            <tr><td>KAFKA_PORT</td><td><code>""</code></td><td>Kafka broker port.</td></tr>
+            <tr><td>S3_ENABLED</td><td><code>False</code></td><td>Enable S3-compatible storage.</td></tr>
+            <tr><td>S3_ENDPOINT</td><td><code>minio:9000</code></td><td>S3 endpoint (host:port).</td></tr>
+            <tr><td>S3_ACCESS_KEY</td><td><code>minioadmin</code></td><td>S3 access key.</td></tr>
+            <tr><td>S3_SECRET_KEY</td><td><code>minioadmin123</code></td><td>S3 secret key.</td></tr>
+            <tr><td>S3_SECURE</td><td><code>False</code></td><td>Use TLS for S3 connection.</td></tr>
+            <tr><td>PELICAN_ENABLED</td><td><code>False</code></td><td>Enable Pelican federation access (OSDF, etc.).</td></tr>
+            <tr><td>PELICAN_FEDERATION_URL</td><td><code>""</code></td><td>Pelican federation URL.</td></tr>
+            <tr><td>USE_JUPYTERLAB</td><td><code>False</code></td><td>Enable JupyterLab integration.</td></tr>
+            <tr><td>JUPYTER_URL</td><td><code>""</code></td><td>JupyterLab instance URL.</td></tr>
+            <tr><td>TEST_TOKEN</td><td><code>""</code></td><td>Test token for development (leave blank in production).</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <h2 id="upgrade">Upgrade</h2>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Pull latest chart version</span>
+helm repo update
+
+<span class="cm"># Upgrade in-place (preserves existing release name and namespace)</span>
+helm upgrade rexec rexec/rexec-stack \
+  -f my-values.yaml \
+  -n rexec</code></pre>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Check the changelog before upgrading.</strong>
+        Minor version bumps may change default values. Always diff your values file against the
+        latest <a href="assets/values.yaml.template" download="values.yaml.template">values.yaml.template</a> after updating the repo.
+      </div>
+    </div>
+
+    <h2 id="uninstall">Uninstall</h2>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>helm uninstall rexec -n rexec</code></pre>
+
+      <pre><code><span class="cm"># Optionally remove the namespace</span>kubectl delete namespace rexec</code></pre>
+    </div>
+
+    <h2 id="debug">Debugging</h2>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Render chart manifests without installing (dry run)</span>
+helm template rexec rexec/rexec-stack -f my-values.yaml --debug
+
+<span class="cm"># Validate values against the chart schema</span>
+helm lint rexec/rexec-stack -f my-values.yaml
+
+<span class="cm"># Check release status</span>
+helm status rexec -n rexec
+
+<span class="cm"># Get computed values for a live release</span>
+helm get values rexec -n rexec
+
+<span class="cm"># Full manifest of what was deployed</span>
+helm get manifest rexec -n rexec</code></pre>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+function switchTab(e, id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+function copyCode(btn) {
+  const pre = btn.closest('.pre-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+const sections = document.querySelectorAll('[id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
+}, { passive: true });
+</script>
+</body>
+</html>
