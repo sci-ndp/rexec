@@ -1,0 +1,62 @@
+name: Deploy Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      # Copy SVG architecture diagrams into docs/assets/ so the pages
+      # can reference them with relative paths on the gh-pages branch.
+      - name: Copy architecture diagrams into docs
+        run: |
+          mkdir -p docs/assets/img
+          cp reference/svg/*.svg docs/assets/img/ 2>/dev/null || true
+          cp reference/rexec-arc.png docs/assets/img/ 2>/dev/null || true
+
+      # Checkout (or create) the gh-pages branch, copy docs over,
+      # and commit — preserving the existing index.yaml (helm repo).
+      - name: Deploy to gh-pages
+        run: |
+          # Save the docs output to a temp dir
+          cp -r docs /tmp/rexec-docs
+
+          # Switch to gh-pages (create if it doesn't exist)
+          git fetch origin gh-pages 2>/dev/null || true
+          git checkout gh-pages 2>/dev/null || git checkout --orphan gh-pages
+
+          # Remove old docs files (but not index.yaml or chart tarballs)
+          find . -maxdepth 1 \
+            -not -name '.' \
+            -not -name '.git' \
+            -not -name 'index.yaml' \
+            -not -name '*.tgz' \
+            -exec rm -rf {} + 2>/dev/null || true
+
+          # Copy new docs
+          cp -r /tmp/rexec-docs/. .
+
+          # Stage and commit
+          git add -A
+          git diff --cached --quiet && echo "No changes to deploy." && exit 0
+          git commit -m "docs: deploy site from main@$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+          git push origin gh-pages
