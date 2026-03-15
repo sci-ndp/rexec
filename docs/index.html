@@ -98,8 +98,8 @@
         </div>
         <h3 style="color:var(--blue);">End User</h3>
         <p style="color:var(--muted);">
-          You're a data scientist or researcher who wants to run notebooks on remote clusters
-          through the NDP Endpoint — without managing infrastructure.
+          You're a data scientist or researcher who wants to transparently offload Python workloads
+          to remote clusters through the NDP Endpoint — without managing infrastructure.
         </p>
         <ul style="color:var(--muted); font-size:.875rem;">
           <li>Install <code>ndp_ep[rexec]</code> via pip</li>
@@ -167,14 +167,14 @@
         </p>
         <p>
           Rexec integrates tightly with the
-          <strong>National Data Platform (NDP) Endpoint API</strong>, which provides
+          <strong>National Data Platform (NDP) Endpoint</strong>, which provides
           dataset discovery, authentication, and the spawn API address. Together, they
           form a complete remote computation substrate for science workflows.
         </p>
         <div class="component-row" style="margin-top:1.5rem;">
           <span class="component-pill">
             <span class="component-pill-dot" style="background:#3B82F6;"></span>
-            Rexec Client (ndp_ep)
+            Rexec Client (ndp_ep.rexec)
           </span>
           <span class="component-pill">
             <span class="component-pill-dot" style="background:#10B981;"></span>
@@ -186,7 +186,7 @@
           </span>
           <span class="component-pill">
             <span class="component-pill-dot" style="background:#8B5CF6;"></span>
-            Deploy API
+            Server Deploy API
           </span>
           <span class="component-pill">
             <span class="component-pill-dot" style="background:#EF4444;"></span>
@@ -223,7 +223,7 @@
     </div>
     <div class="grid grid-3">
       <div class="card">
-        <div class="card-icon" style="background:#EEF4FF; color:var(--blue);">⚡</div>
+        <!-- <div class="card-icon" style="background:#EEF4FF; color:var(--blue);">⚡</div> -->
         <h3>Rexec Broker</h3>
         <span class="badge badge-blue" style="margin-bottom:.75rem; display:inline-block;">ZeroMQ</span>
         <p>
@@ -236,8 +236,8 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#ECFDF5; color:#065F46;">🔧</div>
-        <h3>Rexec Deploy API</h3>
+        <!-- <div class="card-icon" style="background:#ECFDF5; color:#065F46;">🔧</div> -->
+        <h3>Rexec Server Deploy API</h3>
         <span class="badge badge-green" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
         <p>
           A FastAPI service that provisions and tears down per-user <code>rexec-server</code>
@@ -249,7 +249,7 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#FFF7ED; color:#92400E;">🌐</div>
+        <!-- <div class="card-icon" style="background:#FFF7ED; color:#92400E;">🌐</div> -->
         <h3>NDP Endpoint API</h3>
         <span class="badge badge-orange" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
         <p>
@@ -343,8 +343,9 @@ print(f<span class="str">"Collatz(27) halts in {result} steps"</span>)</code></p
         <h5>Source</h5>
         <ul>
           <li><a href="https://github.com/sci-ndp/rexec" target="_blank">This Repo</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">Client Lib</a></li>
+          <li><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">Client Library</a></li>
           <li><a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">Broker</a></li>
+          <li><a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">Server</a></li>
           <li><a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">Deploy API</a></li>
         </ul>
       </div>
