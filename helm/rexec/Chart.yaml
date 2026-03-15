@@ -1,0 +1,21 @@
+apiVersion: v2
+name: rexec-stack
+description: Deploy the SciDx Rexec broker, rexec server deployment API, and NDP Endpoint API.
+type: application
+version: 0.1.1
+appVersion: "0.1.0"
+dependencies:
+  - name: rexec-broker
+    version: 0.1.0
+    repository: "file://./scidx-rexec-broker"
+    condition: rexec-broker.enabled
+  - name: rexec-server-deployment-api
+    version: 0.1.0
+    repository: "file://./scidx-rexec-server-deploy-api"
+    alias: rexec-server-deployment-api
+    condition: rexec-server-deployment-api.enabled
+  - name: ndp-ep-api
+    version: 0.1.0
+    repository: "file://./ndp-ep-api"
+    alias: ndp-ep-api
+    condition: ndp-ep-api.enabled

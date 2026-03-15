@@ -1,0 +1,66 @@
+replicaCount: 1
+
+image:
+  repository: rbardaji/ndp-ep-api
+  tag: latest
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+containerPort: 8000
+
+service:
+  name: ndp-ep-api-service
+  type: ClusterIP
+  port: 8003
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  name: ndp-ep-api-ingress
+  className: public
+  host: 
+  path: ""
+  pathType: Prefix
+  annotations: {}
+  tls: []
+
+resources:
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+
+envSecret:
+  enabled: true
+  create: true
+  name: ndp-ep-env-secret
+  # Optional: supply a local .env-style file at install time.
+  # Keep empty to configure env vars only via `env` values.
+  # e.g. helm install ... --set-file envSecret.envFile=./env-secret.env
+  envFile: ""
+
+# Key-value pairs for the env secret (stringData).
+# This can override keys also present in envFile.
+env: {}
+
+rootPath:
+  enabled: true
+  value: /api
+  configMap:
+    create: true
+    name: root-path-cm
+
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  scaleDownStabilizationWindowSeconds: 60
+
+namespace:
+  create: false

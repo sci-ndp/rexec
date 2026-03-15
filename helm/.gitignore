@@ -1,0 +1,31 @@
+# Helm build artifacts
+charts/
+*.tgz
+
+# Helm deps / cache
+Chart.lock
+Chart.lock.yaml
+.helm/
+.helmcache/
+.helmignore
+
+# Rendered manifests / local outputs
+*.yaml.rendered
+*.yml.rendered
+manifests/
+rendered/
+output/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+*.env
+/rexec/values.yaml

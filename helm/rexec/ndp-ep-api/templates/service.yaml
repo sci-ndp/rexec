@@ -1,0 +1,15 @@
+{{- $serviceName := .Values.service.name | default (printf "%s-service" (include "ndp-ep-api.fullname" .)) -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $serviceName }}
+  labels:
+    {{- include "ndp-ep-api.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "ndp-ep-api.selectorLabels" . | nindent 4 }}
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
