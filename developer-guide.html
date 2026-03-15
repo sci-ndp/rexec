@@ -230,7 +230,6 @@ pip install -e ".[rexec]"
     </p>
 
     <div class="callout callout-info">
-      <span class="callout-icon">ℹ️</span>
       <div class="callout-body">
         <strong>Prerequisites</strong>
         You need a running broker and deploy API reachable from your machine — either a
@@ -323,7 +322,7 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
         <div class="step-num">2</div>
         <div class="step-body">
           <h4>Deploy API provisions a pod</h4>
-          <p>Deploy API creates a new namespace (<code>rexec-server-&lt;user&gt;</code>) and deploys a <code>rexec-server</code> pod. The pod automatically connects to the broker's internal ClusterIP.</p>
+          <p>Deploy API creates a new namespace (<code>rexec-server-&lt;user-id&gt;</code>) and deploys a <code>rexec-server</code> pod. The pod automatically connects to the broker's internal ClusterIP.</p>
         </div>
       </div>
       <div class="step">
@@ -364,7 +363,6 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
 
     <h2 id="contributing">Contributing Guidelines</h2>
     <div class="callout callout-info">
-      <span class="callout-icon">📋</span>
       <div class="callout-body">
         <strong>Before opening a PR</strong>
         <ul style="margin:.5rem 0 0 1rem;">
@@ -391,7 +389,6 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
       Docker Hub under the <code>latest</code> tag automatically.
     </p>
     <div class="callout callout-info">
-      <span class="callout-icon">ℹ️</span>
       <div class="callout-body">
         <strong>Helm chart always pulls the latest image</strong>
         The chart sets <code>imagePullPolicy: Always</code> for both components, so a running cluster will
@@ -476,7 +473,6 @@ helm upgrade --install rexec ./helm/rexec \
     </div>
 
     <div class="callout callout-tip">
-      <span class="callout-icon">💡</span>
       <div class="callout-body">
         <strong>kind cluster for local testing</strong>
         <div class="pre-wrap" style="margin-top:.5rem; margin-bottom:0;">
