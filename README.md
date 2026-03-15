@@ -1,5 +1,9 @@
 # SciDx Remote Execution
 
+https://sci-ndp.github.io/rexec
+
+---
+
 Remote Execution (Rexec) is a lightweight framework to enable remote code execution from Jupyter Notebooks or Python scripts to remote compute resources. It is designed to work with the [NDP Endpoint]
 
 
