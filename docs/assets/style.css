@@ -453,6 +453,30 @@ footer {
 
 /* ── Copy button ──────────────────────────────────────────── */
 .pre-wrap { position: relative; }
+.pre-wrap.output {
+  position: relative;
+}
+.pre-wrap.output::before {
+  content: "output";
+  position: absolute;
+  top: .45rem;
+  right: .75rem;
+  font-size: .62rem;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #6B7280;
+  z-index: 1;
+}
+.pre-wrap.output pre {
+  background: #F8FAFC;
+  border: 1px solid #CBD5E1;
+  border-left: 3px solid #94A3B8;
+  border-radius: 6px;
+  color: #334155;
+  font-size: .8rem;
+  box-shadow: none;
+}
 .copy-btn {
   position: absolute; top: .6rem; right: .6rem;
   background: #1E3A5F;
