@@ -219,13 +219,13 @@
   <div class="container">
     <div class="section-header">
       <h2>3 Server-Side Components</h2>
-      <p>Deployed together with a single Helm chart, these services enable the full remote execution pipeline.</p>
+      <p>Deployed together with a single Helm chart, these services enable the full remote execution pipeline. <a href="helm-chart.html">View Helm Chart →</a></p>
     </div>
     <div class="grid grid-3">
       <div class="card">
         <!-- <div class="card-icon" style="background:#EEF4FF; color:var(--blue);">⚡</div> -->
         <h3>Rexec Broker</h3>
-        <span class="badge badge-blue" style="margin-bottom:.75rem; display:inline-block;">ZeroMQ</span>
+        <span class="badge" style="margin-bottom:.75rem; display:inline-block; background:#FEE2E2; color:#B91C1C;">ZeroMQ</span>
         <p>
           A stateless ZeroMQ proxy that routes messages between many clients and
           many server pods. Exposes a client-facing NodePort (<code>30001</code>) and
@@ -251,7 +251,7 @@
       <div class="card">
         <!-- <div class="card-icon" style="background:#FFF7ED; color:#92400E;">🌐</div> -->
         <h3>NDP Endpoint API</h3>
-        <span class="badge badge-orange" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
+        <span class="badge badge-green" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
         <p>
           The NDP Endpoint API providing dataset search, authentication, and the
           Rexec spawn API address to clients. Supports CKAN, MongoDB, Kafka, S3,
