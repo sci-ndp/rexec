@@ -53,6 +53,7 @@
       <ul>
         <li><a href="#prereqs">Requirements</a></li>
         <li><a href="#auth-prereq">Auth API</a></li>
+        <li><a href="#what-you-deploy">What You Deploy</a></li>
       </ul>
       <div class="sidebar-section">Helm Deployment</div>
       <ul>
@@ -117,6 +118,38 @@
         authentication failures.
       </div>
     </div>
+
+    <!-- ═══════════════ WHAT YOU DEPLOY ══════════════════ -->
+    <h2 id="what-you-deploy">What You Deploy</h2>
+    <p>
+      As an NDP Endpoint Provider you are responsible for the three server-side components
+      highlighted below. The client library and the Auth API are external to your infrastructure —
+      you do not manage them.
+    </p>
+    <div class="arch-diagram" style="padding:1.5rem;">
+      <img
+        src="https://raw.githubusercontent.com/sci-ndp/rexec/main/reference/svg/rexec-sysadmin-highlight.svg"
+        alt="Rexec Architecture — Sysadmin Components Highlighted"
+        style="max-width:100%; border-radius:8px;"
+        onerror="this.outerHTML='<p style=\'color:var(--muted);padding:2rem 0;\'>Diagram: <a href=\'https://github.com/sci-ndp/rexec/blob/main/reference/svg/rexec-sysadmin-highlight.svg\' target=\'_blank\'>view on GitHub ↗</a></p>'"
+      />
+    </div>
+    <div class="grid grid-3" style="margin-top:1.5rem;">
+      <div class="card" style="padding:1.1rem;">
+        <h4>Rexec Broker</h4>
+        <p style="font-size:.875rem;">ZeroMQ ROUTER–DEALER proxy. Always running. Exposes NodePort <code>30001</code> to clients and ClusterIP <code>5560</code> to server pods.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>Server Deploy API (spawn api)</h4>
+        <p style="font-size:.875rem;">FastAPI service that spawns and tears down rexec server pods in Kubernetes on demand. Requires kubeconfig access.</p>
+      </div>
+      <div class="card" style="padding:1.1rem;">
+        <h4>NDP EP API</h4>
+        <p style="font-size:.875rem;">FastAPI gateway that end users call. Authenticates requests, delegates spawn to Deploy API, and returns the broker URL to the client.</p>
+      </div>
+    </div>
+
+    <hr class="divider" />
 
     <!-- ═══════════════ HELM DEPLOY ══════════════════ -->
     <h2 id="helm-deploy">Helm Deployment <span class="badge badge-green" style="vertical-align:middle;">Recommended</span></h2>
