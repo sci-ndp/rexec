@@ -292,16 +292,38 @@ ndp-ep-api:
     <h3 id="helm-verify">Verify Deployment</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-      <pre><code><span class="cm"># Check pods</span>
-kubectl get pods -n rexec
-
-<span class="cm"># Check broker NodePort services</span>
-kubectl get svc -n rexec-broker
-<span class="cm"># Expected svc:</span>
-<span class="cm"># rexec-broker-internal-ip   ClusterIP   — port 5560 (for server pods)</span>
-<span class="cm"># rexec-broker-external-ip   NodePort    — port 30001 (for clients)</span>
-
-<span class="cm"># Check Deploy API swagger UI</span>
+      <pre><code>kubectl get pods -n rexec</code></pre>
+    </div>
+    <div class="pre-wrap output">
+      <pre><code>NAME                                    READY   STATUS    RESTARTS   AGE
+rexec-broker-76c5bbf667-lvxtk           1/1     Running   0          -
+rexec-deployment-api-5d554d854c-rdr78   1/1     Running   0          -
+rexec-ndp-ep-api-7f9b4f757-j6g9h        1/1     Running   0          -</code></pre>
+    </div>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>kubectl get deploy -n rexec</code></pre>
+    </div>
+    <div class="pre-wrap output">
+      <pre><code>NAME                   READY   UP-TO-DATE   AVAILABLE   AGE
+rexec-broker           1/1     1            1           -
+rexec-deployment-api   1/1     1            1           -
+rexec-ndp-ep-api       1/1     1            1           -</code></pre>
+    </div>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>kubectl get svc -n rexec</code></pre>
+    </div>
+    <div class="pre-wrap output">
+      <pre><code>NAME                       TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                        AGE
+ndp-ep-api-service         ClusterIP   10.152.183.190   &lt;none&gt;        8003/TCP                       -
+rexec-broker-external-ip   NodePort    10.152.183.245   &lt;none&gt;        5559:30001/TCP,5561:30002/TCP  -
+rexec-broker-internal-ip   ClusterIP   10.152.183.118   &lt;none&gt;        5560/TCP                       -
+rexec-deployment-api       ClusterIP   10.152.183.36    &lt;none&gt;        8000/TCP                       -</code></pre>
+    </div>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># Check Deploy API swagger UI</span>
 curl http://&lt;ingress-host&gt;/rexec/docs
 
 <span class="cm"># Check NDP EP API health</span>
