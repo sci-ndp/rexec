@@ -79,7 +79,7 @@
 
     <div class="grid grid-2" style="margin-bottom:1.5rem;">
       <div class="card">
-        <div class="card-icon" style="background:#EEF4FF;color:var(--blue);">①</div>
+        <div class="card-icon" style="background:#FEF2F2;color:#991B1B;">①</div>
         <h4>Client Layer</h4>
         <p>The <code>ndp_ep</code> or <code>scidx-rexec</code> Python library running on the user's machine. Serializes function objects and sends them over ZeroMQ.</p>
       </div>
@@ -89,22 +89,22 @@
         <p>FastAPI gateway. Provides the broker address and spawn API URL to authenticated clients. Also provides dataset discovery.</p>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#FFF7ED;color:#92400E;">③</div>
+        <div class="card-icon" style="background:#FFE4E4;color:#DC2626;">③</div>
         <h4>ZeroMQ Broker</h4>
         <p>Stateless message router deployed inside the cluster. Routes function call frames between N clients and N dedicated server pods.</p>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#FEF2F2;color:#7F1D1D;">④</div>
-        <h4>Deploy API</h4>
+        <div class="card-icon" style="background:#ECFDF5;color:#065F46;">④</div>
+        <h4>Server Deploy API</h4>
         <p>FastAPI service that provisions and tears down per-user <code>rexec-server</code> pods via the Kubernetes API.</p>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#F5F3FF;color:#5B21B6;">⑤</div>
+        <div class="card-icon" style="background:#FEF2F2;color:#991B1B;">⑤</div>
         <h4>Rexec Server Pods</h4>
         <p>Per-user worker pods running inside the cluster. Connect to the broker's internal address and execute dispatched Python functions.</p>
       </div>
       <div class="card">
-        <div class="card-icon" style="background:#F0FDFA;color:#065F46;">⑥</div>
+        <div class="card-icon" style="background:#E5E7EB;color:#9CA3AF;">⑥</div>
         <h4>Auth API</h4>
         <p>External identity provider. All components validate Bearer tokens against the same <code>AUTH_API_URL</code> endpoint.</p>
       </div>
