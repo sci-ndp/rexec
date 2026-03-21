@@ -134,13 +134,13 @@
       </div>
 
       <div class="audience-card" style="background:linear-gradient(135deg,#0D1829,#1A2B4A); border:1px solid #2D4270;">
-        <div style="font-size:2rem;">🧑🏻‍💻</div>
-        <h3 style="color:#7DD3FC;">Developer</h3>
+        <div style="font-size:1rem; color:#e1e1e1;">< / ></div>
+        <h3 style="color:#e1e1e1;">Developer</h3>
         <p style="color:rgba(255,255,255,.6);">
           You want to understand the internals, contribute, or extend Rexec with new
           capabilities.
         </p>
-        <ul style="color:rgba(255,255,255,.6); font-size:.875rem;">
+        <ul style="color:rgba(217, 217, 217, 0.6); font-size:.875rem;">
           <li>Run a local dev stack with editable installs</li>
           <li>Explore 4 separate source repositories</li>
           <li>ZeroMQ broker + FastAPI service architecture</li>
@@ -173,23 +173,23 @@
         </p>
         <div class="component-row" style="margin-top:1.5rem;">
           <span class="component-pill">
-            <span class="component-pill-dot" style="background:#3B82F6;"></span>
+            <span class="component-pill-dot" style="background:#ff0000;"></span>
             Rexec Client (ndp_ep.rexec)
           </span>
           <span class="component-pill">
-            <span class="component-pill-dot" style="background:#10B981;"></span>
+            <span class="component-pill-dot" style="background:#ff0000;"></span>
             ZeroMQ Broker
           </span>
           <span class="component-pill">
-            <span class="component-pill-dot" style="background:#F59E0B;"></span>
-            Server Pod
+            <span class="component-pill-dot" style="background:#ff0000;"></span>
+            Rexec Server Pod
           </span>
           <span class="component-pill">
-            <span class="component-pill-dot" style="background:#8B5CF6;"></span>
+            <span class="component-pill-dot" style="background:#00c40d;"></span>
             Server Deploy API
           </span>
           <span class="component-pill">
-            <span class="component-pill-dot" style="background:#EF4444;"></span>
+            <span class="component-pill-dot" style="background:#00c40d;"></span>
             NDP EP API
           </span>
         </div>
@@ -292,7 +292,7 @@ client = APIClient(
 client.setup_rexec_environment( requirements=<span class="str">"input_requirements.txt"</span> )
 
 <span class="cm"># 3) Define and submit a remote function</span>
-@remote_func
+<span class="decorator">@remote_func</span>
 <span class="kw">def</span> collatz_steps(n: int) -> int:
     steps = <span class="num">0</span>
     <span class="kw">while</span> n != <span class="num">1</span>:
@@ -344,10 +344,10 @@ print(f<span class="str">"Collatz(27) halts in {result} steps"</span>)</code></p
         <h5>Source</h5>
         <ul>
           <li><a href="https://github.com/sci-ndp/rexec" target="_blank">This Repo</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">Client Library</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">Broker</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">Server</a></li>
-          <li><a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">Deploy API</a></li>
+          <li><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">RExec Client Lib</a></li>
+          <li><a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">RExec Broker</a></li>
+          <li><a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">RExec Server</a></li>
+          <li><a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">Server Deploy API</a></li>
         </ul>
       </div>
     </div>
