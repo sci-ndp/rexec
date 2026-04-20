@@ -29,6 +29,32 @@ entries:
     version: 0.0.9
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-04-20T23:46:26.683352061Z"
+    dependencies:
+    - condition: rexec-broker.enabled
+      name: rexec-broker
+      repository: file://./scidx-rexec-broker
+      version: 0.1.0
+    - alias: rexec-server-deployment-api
+      condition: rexec-server-deployment-api.enabled
+      name: rexec-server-deployment-api
+      repository: file://./scidx-rexec-server-deploy-api
+      version: 0.1.0
+    - alias: ndp-ep-api
+      condition: ndp-ep-api.enabled
+      name: ndp-ep-api
+      repository: file://./ndp-ep-api
+      version: 0.1.0
+    description: Deploy the SciDx Rexec broker, rexec server deployment API, and NDP
+      Endpoint API.
+    digest: 622ebc244985dc841225cb014cf6d226a89838bd0ce41aa3a7bea9f7a27837be
+    name: rexec-stack
+    type: application
+    urls:
+    - https://github.com/sci-ndp/rexec/releases/download/rexec-stack-0.0.9-alpha/rexec-stack-0.0.9-alpha.tgz
+    version: 0.0.9-alpha
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-04-20T23:41:12.480065584Z"
     dependencies:
     - condition: rexec-broker.enabled
@@ -183,4 +209,4 @@ entries:
     urls:
     - https://github.com/sci-ndp/rexec/releases/download/rexec-stack-0.0.8/rexec-stack-0.0.8.tgz
     version: 0.0.8
-generated: "2026-04-20T23:41:12.480121518Z"
+generated: "2026-04-20T23:46:26.683403547Z"
