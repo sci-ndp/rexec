@@ -56,3 +56,5 @@ jobs:
     needs: sync-version
     if: needs.sync-version.outputs.docs_changed == 'true'
     uses: ./.github/workflows/deploy-docs.yaml
+    permissions:
+      contents: write
