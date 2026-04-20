@@ -1,0 +1,45 @@
+name: Sync Helm Version to Docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'helm/rexec/Chart.yaml'
+  workflow_dispatch:
+
+jobs:
+  sync-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read chart version
+        id: chart
+        run: |
+          VERSION=$(grep '^version:' helm/rexec/Chart.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update version in docs HTML files
+        run: |
+          VERSION="${{ steps.chart.outputs.version }}"
+          # Update nav-version badges (e.g. v0.0.8 → v0.0.9)
+          find docs -name "*.html" -exec \
+            sed -i "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v${VERSION}/g" {} +
+          # Update the version table row in helm-chart.html
+          sed -i \
+            "s|<td>version</td><td>[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*</td>|<td>version</td><td>${VERSION}</td>|g" \
+            docs/helm-chart.html
+
+      - name: Commit and push if docs changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --cached --quiet && echo "Docs already up to date." && exit 0
+          git commit -m "docs: bump helm chart version to v${{ steps.chart.outputs.version }}"
+          git push origin main
