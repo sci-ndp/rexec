@@ -29,12 +29,12 @@ jobs:
       - name: Update version in docs HTML files
         run: |
           VERSION="${{ steps.chart.outputs.version }}"
-          # Update nav-version badges (e.g. v0.0.8 → v0.0.9)
+          # Update nav-version badges — match full semver incl. pre-release suffix (e.g. v0.0.9-1)
           find docs -name "*.html" -exec \
-            sed -i "s/v[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/v${VERSION}/g" {} +
+            sed -i -E "s/v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)*/v${VERSION}/g" {} +
           # Update the version table row in helm-chart.html
-          sed -i \
-            "s|<td>version</td><td>[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*</td>|<td>version</td><td>${VERSION}</td>|g" \
+          sed -i -E \
+            "s|<td>version</td><td>[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)*</td>|<td>version</td><td>${VERSION}</td>|g" \
             docs/helm-chart.html
 
       - name: Commit and push if docs changed
