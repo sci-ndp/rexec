@@ -61,4 +61,5 @@ jobs:
           git add -A
           git diff --cached --quiet && echo "No changes to deploy." && exit 0
           git commit -m "docs: deploy site from main@$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown')"
+          git pull --rebase origin gh-pages
           git push origin gh-pages
