@@ -27,6 +27,8 @@ show the mechanism for isolation and security, e.g., using K8s namespaces, netwo
 
 ref: <br>
 https://www.eccouncil.org/cybersecurity-exchange/security-operation-center/mitre-attack-framework-guide/
+https://nrp.ai/documentation/admindocs/cluster/security-tools/
+https://nrp.ai/documentation/admindocs/participating/network/
 
 ## 4. Performance Benchmarking
 -  Cold start: pod spawn (Server Deploy API + K8s scheduling)
