@@ -12,13 +12,13 @@ egress traffic, pod cpu usage..
 
  a. Fix the requirements-injection path. create_rexec_server.py + manifests/rexec-server-deployment.yaml. User-supplied requirement strings get string-substituted unescaped into a sh -c "pip install ...; git clone ..." run as root with full egress. Switch to writing requirements to a mounted file (pip install -r) and validate each entry against a strict allowlist (reject @, ;, env markers) before it's ever built into a command. Highest severity, smallest blast radius to fix, and it's the file you're already in.
     <br>
-    https://github.com/sci-ndp/rexec/blob/381e0026fa9a6a892b6d10473343ec4fb37dec9e/CHANGELOG.md?plain=1#L10
+    https://github.com/sci-ndp/rexec/blob/41b175afec8a3e1ea17416d27b4acafa8a7893bc/CHANGELOG.md?plain=1#L11
  
  --
  
  b. Add resources.requests/limits + ephemeral-storage limits to the same manifest (rexec-server-deployment.yaml) — currently zero resource stanza exists anywhere. Pick 2-3 fixed size tiers; never trust a client-supplied size. This is the literal "resource quotas" ask and touches the exact code you have open.
     <br>
-    https://github.com/sci-ndp/rexec/blob/381e0026fa9a6a892b6d10473343ec4fb37dec9e/CHANGELOG.md?plain=1#L19
+    https://github.com/sci-ndp/rexec/blob/41b175afec8a3e1ea17416d27b4acafa8a7893bc/CHANGELOG.md?plain=1#L20
 
 --
 
@@ -34,7 +34,7 @@ In that third case the caller is told their new environment is live, but nothing
 
 Net effect: a later remote call that depends on the new requirements (e.g. imports a package only in the new requirements.txt) fails on the *old*, unchanged environment with an unrelated-looking error, with nothing anywhere connecting that failure back to the silently-ignored /spawn call.
 <br>
-https://github.com/sci-ndp/rexec/blob/381e0026fa9a6a892b6d10473343ec4fb37dec9e/CHANGELOG.md?plain=1#L22
+https://github.com/sci-ndp/rexec/blob/41b175afec8a3e1ea17416d27b4acafa8a7893bc/CHANGELOG.md?plain=1#L24
 
 --
 
