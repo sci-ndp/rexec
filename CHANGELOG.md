@@ -29,7 +29,7 @@ grouped by repo.
   in-progress job.
   <br>
   https://github.com/sci-ndp/rexec-server-k8s-deployment-api/commit/12b85151c09d75419fdf6206aaa83aa902533819
-  - Added a Postman collection (`postman/`) exercising all four `/spawn`
+  - Added a Postman collection exercising all four `/spawn`
   outcomes end-to-end.
   
 - Unified the response shape across success/conflict/error cases so client
