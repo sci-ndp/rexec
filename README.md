@@ -7,7 +7,7 @@ pip install ndp_ep[rexec]
 ```
 
 #### Getting Started
-Learn to use NDP Endpoint with Remote Execution, walk through the [`example notebook`](./user/rexec_quickstart.ipynb).
+Learn to use NDP Endpoint with Remote Execution, walk through the example [`notebook`](./user/rexec_quickstart.ipynb).
 
 ## Source Repos:
 |              |                                                                                       |
