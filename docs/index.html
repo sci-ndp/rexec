@@ -6,7 +6,6 @@
   <title>Home - Remote Execution</title>
   <meta name="description" content="Rexec is a lightweight framework to enable remote code execution from Jupyter Notebooks or Python scripts to remote compute resources via the National Data Platform." />
   <link rel="stylesheet" href="assets/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
 </head>
 <body class="page-body">
 
@@ -17,18 +16,23 @@
     Remote Execution
   </a>
   <ul class="nav-links">
+    <li><a href="how-it-works.html">How It Works</a></li>
     <li><a href="user-guide.html">User Guide</a></li>
-    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
-    <li><a href="developer-guide.html">Developer</a></li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="helm-chart.html">Helm Chart</a></li>
-    <li><a href="api-reference.html">API Reference</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle" type="button" aria-haspopup="true">Reference <span class="nav-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav-dropdown-menu">
+        <li><a href="api-reference.html">API Reference</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="developer-guide.html">Developer Guide</a></li>
+        <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+        <li><a href="helm-chart.html">Helm Chart</a></li>
+      </ul>
+    </li>
   </ul>
-  <span class="nav-version">v0.0.9-alpha</span>
   <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
     <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
   </a>
-  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
 </header>
 
 <!-- ── Hero ─────────────────────────────────────────────────── -->
@@ -42,122 +46,24 @@
     <!-- <div class="hero-badge">National Data Platform · SciDx</div> -->
     <h1>SciDx Remote Execution</h1>
     <p>
-      Rexec is a lightweight, broker-mediated framework that lets scientists run code
-      from Jupyter Notebooks or Python scripts on remote HPC/cloud compute resources —
-      without leaving their local environment.
+      Rexec is a broker-mediated framework for executing Python code from Jupyter
+      Notebooks or scripts on remote HPC and cloud compute resources, without requiring
+      users to manage the remote environment.
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="user-guide.html">Get Started →</a>
-      <a class="btn btn-outline" href="architecture.html">How It Works</a>
-      <a class="btn btn-outline" href="https://github.com/sci-ndp/rexec" target="_blank">View on GitHub</a>
+      <!-- <a class="btn btn-primary" href="user-guide.html">Get Started →</a> -->
+      <a class="btn btn-outline" href="how-it-works.html">How It Works</a>
+      <!-- <a class="btn btn-outline" href="https://github.com/sci-ndp/rexec" target="_blank">View on GitHub</a> -->
     </div>
   </div>
 </section>
 
-<!-- ── Stat bar ──────────────────────────────────────────────── -->
-<section style="background:var(--navy); padding: 1.75rem 2rem;">
-  <div class="container">
-    <div class="stat-row" style="justify-content:center; gap:3.5rem;">
-      <div class="stat">
-        <div class="stat-value" style="color:#7DD3FC;">3</div>
-        <div class="stat-label" style="color:rgba(255,255,255,.5);">Core Components</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" style="color:#86EFAC;">1-line</div>
-        <div class="stat-label" style="color:rgba(255,255,255,.5);">End User Install</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" style="color:#ff4646;">ZeroMQ<a href="https://zeromq.org" target="_blank" rel="noopener" title="ZeroMQ official site" style="color:#ff4646;margin-left:.3em;font-size:.55em;vertical-align:super;opacity:.75;text-decoration:none;">&#x2197;</a></div>
-        <div class="stat-label" style="color:rgba(255,255,255,.5);">Transport Layer</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" style="color:#186dff;">Helm<a href="https://helm.sh" target="_blank" rel="noopener" title="Helm official site" style="color:#186dff;margin-left:.3em;font-size:.55em;vertical-align:super;opacity:.75;text-decoration:none;">&#x2197;</a></div>
-        <div class="stat-label" style="color:rgba(255,255,255,.5);">Server side K8s Deployment</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Audience cards ────────────────────────────────────────── -->
+<!-- ── Overview ──────────────────────────────────────────────── -->
 <section class="section">
   <div class="container">
-    <div class="section-header">
-      <h2>Who are you?</h2>
-      <p>Rexec serves different audiences. Jump to the guide that fits your role.</p>
-    </div>
-    <div class="grid grid-3">
-
-      <div class="audience-card" style="background:linear-gradient(135deg,#EEF4FF,#F6F9FF); border:1px solid var(--blue-mid);">
-        <div style="width:2.2rem;height:2.2rem;margin-bottom:.25rem;">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
-            <rect x="3" y="3" width="18" height="13" rx="1.5" stroke="#0039A7" stroke-width="1.5" fill="none"/>
-            <path d="M8 20h8M12 16v4" stroke="#0039A7" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M7 8.5h2.5M7 11h4" stroke="#0039A7" stroke-width="1.5" stroke-linecap="round"/>
-            <path d="M14 8l2.5 2.5L14 13" stroke="#0039A7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <h3 style="color:var(--blue);">End User</h3>
-        <p style="color:var(--muted);">
-          You're a data scientist or researcher who wants to transparently offload Python workloads
-          to remote clusters through the NDP Endpoint — without managing infrastructure.
-        </p>
-        <ul style="color:var(--muted); font-size:.875rem;">
-          <li>Install <code>ndp_ep[rexec]</code> via pip</li>
-          <li>Authenticate with a Bearer token</li>
-          <li>Submit jobs from your local Jupyter</li>
-        </ul>
-        <a class="btn btn-blue" href="user-guide.html">User Guide →</a>
-      </div>
-
-      <div class="audience-card" style="background:linear-gradient(135deg,#001642,#0039A7); border:1px solid #1E4FA0;">
-        <div style="width:2.2rem;height:2.2rem;margin-bottom:.25rem;">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
-            <rect x="2" y="3" width="20" height="14" rx="2" stroke="#7DD3FC" stroke-width="1.5" fill="none"/>
-            <path d="M8 21h8M12 17v4" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="7" cy="8" r="1.5" fill="#7DD3FC"/>
-            <circle cx="12" cy="8" r="1.5" fill="#7DD3FC"/>
-            <circle cx="17" cy="8" r="1.5" fill="#7DD3FC"/>
-            <path d="M5 12h14" stroke="#7DD3FC" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <h3 style="color:#fff;">NDP Provider / Sysadmin</h3>
-        <p style="color:rgba(255,255,255,.7);">
-          You operate a Kubernetes cluster and want to offer remote execution capability
-          to your NDP Endpoint's users.
-        </p>
-        <ul style="color:rgba(255,255,255,.7); font-size:.875rem;">
-          <li>Deploy broker, spawn API, and ep-api</li>
-          <li>One Helm chart installs all 3 services</li>
-          <li>Configure auth and group access control</li>
-        </ul>
-        <a class="btn btn-primary" href="sysadmin-guide.html">Sysadmin Guide →</a>
-      </div>
-
-      <div class="audience-card" style="background:linear-gradient(135deg,#0D1829,#1A2B4A); border:1px solid #2D4270;">
-        <div style="font-size:1rem; color:#e1e1e1;">< / ></div>
-        <h3 style="color:#e1e1e1;">Developer</h3>
-        <p style="color:rgba(255,255,255,.6);">
-          You want to understand the internals, contribute, or extend Rexec with new
-          capabilities.
-        </p>
-        <ul style="color:rgba(217, 217, 217, 0.6); font-size:.875rem;">
-          <li>Run a local dev stack with editable installs</li>
-          <li>Explore 4 separate source repositories</li>
-          <li>ZeroMQ broker + FastAPI service architecture</li>
-        </ul>
-        <a class="btn btn-outline" href="developer-guide.html">Developer Guide →</a>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ── What is Rexec ─────────────────────────────────────────── -->
-<section class="section section-alt">
-  <div class="container">
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center;">
-      <div>
-        <h2>What is Rexec?</h2>
+    <div class="overview">
+      <div class="overview-text">
+        <h2>Overview</h2>
         <p>
           <strong>SciDx Remote Execution (Rexec)</strong> is a broker-mediated remote code
           execution system built on ZeroMQ. It allows end users to submit Python workloads
@@ -166,66 +72,114 @@
           Kubernetes cluster.
         </p>
         <p>
-          Rexec integrates tightly with the
+          Rexec integrates with the
           <strong>National Data Platform (NDP) Endpoint</strong>, which provides
-          dataset discovery, authentication, and the spawn API address. Together, they
-          form a complete remote computation substrate for science workflows.
-        </p>
-        <div class="component-row" style="margin-top:1.5rem;">
-          <span class="component-pill">
-            <span class="component-pill-dot" style="background:#ff0000;"></span>
-            Rexec Client (ndp_ep.rexec)
-          </span>
-          <span class="component-pill">
-            <span class="component-pill-dot" style="background:#ff0000;"></span>
-            ZeroMQ Broker
-          </span>
-          <span class="component-pill">
-            <span class="component-pill-dot" style="background:#ff0000;"></span>
-            Rexec Server Pod
-          </span>
-          <span class="component-pill">
-            <span class="component-pill-dot" style="background:#00c40d;"></span>
-            Server Deploy API
-          </span>
-          <span class="component-pill">
-            <span class="component-pill-dot" style="background:#00c40d;"></span>
-            NDP EP API
-          </span>
-        </div>
-      </div>
-      <div>
-        <div class="arch-diagram">
-          <img
-            src="https://raw.githubusercontent.com/sci-ndp/rexec/main/reference/svg/rexec-arc.svg"
-            alt="Rexec System Architecture Diagram"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-          />
-          <div style="display:none; color:rgba(255,255,255,.5); padding:2rem; font-size:.875rem;">
-            Architecture diagram — see
-            <a href="architecture.html" style="color:#7DD3FC;">Architecture page</a>
-          </div>
-        </div>
-        <p style="text-align:center; font-size:.8rem; color:var(--muted); margin-top:.75rem;">
-          Full diagram on <a href="architecture.html">Architecture page</a>
+          dataset discovery, authentication, and the address of the Server Deploy API.
+          They provide a remote computation platform for scientific
+          workflows.
         </p>
       </div>
+      <dl class="overview-facts">
+        <div><dt>Client</dt><dd><code>ndp_ep[rexec]</code> Python library</dd></div>
+        <div><dt>Transport</dt><dd>ZeroMQ, through a central broker</dd></div>
+        <div><dt>Execution</dt><dd>Dedicated per-user server pods on Kubernetes</dd></div>
+        <div><dt>Provisioning</dt><dd>Server Deploy API (FastAPI)</dd></div>
+        <div><dt>Integration</dt><dd>NDP Endpoint API (FastAPI)
+</dd></div>
+        <div><dt>Authentication</dt><dd>Bearer token through Keycloak</dd></div>
+      </dl>
+    </div>
+
+    <figure class="overview-figure">
+      <div class="overview-figure-frame">
+        <img
+          src="https://raw.githubusercontent.com/sci-ndp/rexec/main/reference/svg/rexec-arc.svg"
+          alt="Rexec system architecture diagram"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+        />
+        <p class="overview-figure-fallback">
+          The architecture diagram could not be loaded. See the
+          <a href="architecture.html">Architecture</a> page.
+        </p>
+      </div>
+      <figcaption>
+        <strong>Figure 1.</strong> Rexec system architecture. The client library obtains the
+        Server Deploy API address from the NDP Endpoint API, requests a per-user server pod
+        and the broker address from the Deploy API, and then exchanges function calls and
+        results with that pod through the broker. A detailed description is available on the
+        <a href="architecture.html">Architecture</a> page.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ── Audience cards ────────────────────────────────────────── -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-header">
+      <h2>Documentation by Role</h2>
+      <p>The documentation is organized for three audiences. Select the guide that corresponds to your role.</p>
+    </div>
+    <div class="grid grid-3">
+
+      <div class="audience-card" style="background:var(--card-bg); border:1px solid var(--border);">
+        <h3>End User</h3>
+        <p style="color:var(--muted);">
+          Researchers and data scientists who execute Python workloads on remote clusters
+          through an NDP Endpoint, without managing the underlying infrastructure.
+        </p>
+        <ul style="color:var(--muted); font-size:.875rem;">
+          <li>Installation of <code>ndp_ep[rexec]</code></li>
+          <li>Authentication with a Bearer token</li>
+          <li>Job submission from a local Jupyter environment</li>
+        </ul>
+        <a class="btn btn-blue" href="user-guide.html">User Guide</a>
+      </div>
+
+      <div class="audience-card" style="background:var(--card-bg); border:1px solid var(--border);">
+        <h3>NDP Provider / Sysadmin</h3>
+        <p style="color:var(--muted);">
+          Operators of Kubernetes clusters who provide remote execution capability to the
+          users of an NDP Endpoint.
+        </p>
+        <ul style="color:var(--muted); font-size:.875rem;">
+          <li>Deployment of the broker, Deploy API, and EP API</li>
+          <li>Installation of all three services with a single Helm chart</li>
+          <li>Configuration of authentication and group-based access control</li>
+        </ul>
+        <a class="btn btn-blue" href="sysadmin-guide.html">Sysadmin Guide</a>
+      </div>
+
+      <div class="audience-card" style="background:var(--card-bg); border:1px solid var(--border);">
+        <h3>Developer</h3>
+        <p style="color:var(--muted);">
+          Contributors who study the system internals, modify existing components, or extend
+          Rexec with new capabilities.
+        </p>
+        <ul style="color:var(--muted); font-size:.875rem;">
+          <li>Local development with editable installs</li>
+          <li>Overview of the source repositories</li>
+          <li>ZeroMQ broker and FastAPI service architecture</li>
+        </ul>
+        <a class="btn btn-blue" href="developer-guide.html">Developer Guide</a>
+      </div>
+
     </div>
   </div>
 </section>
 
-<!-- ── 3 Components ──────────────────────────────────────────── -->
+<!-- ── Components ───────────────────────────────────────────── -->
 <section class="section">
   <div class="container">
     <div class="section-header">
-      <h2>3 Server-Side Components</h2>
-      <p>Deployed together with a single Helm chart, these services enable the full remote execution pipeline. <a href="helm-chart.html">View Helm Chart →</a></p>
+      <h2>Server-Side Components</h2>
+      <p>The following three services are deployed together with a single Helm chart and together implement the remote execution pipeline. See the <a href="helm-chart.html">Helm Chart</a> reference for configuration details.</p>
     </div>
     <div class="grid grid-3">
       <div class="card">
         <!-- <div class="card-icon" style="background:#EEF4FF; color:var(--blue);">⚡</div> -->
         <h3>Rexec Broker</h3>
-        <span class="badge" style="margin-bottom:.75rem; display:inline-block; background:#FEE2E2; color:#B91C1C;">ZeroMQ</span>
+        <span class="badge badge-blue" style="margin-bottom:.75rem; display:inline-block;">ZeroMQ</span>
         <p>
           A stateless ZeroMQ proxy that routes messages between many clients and
           many server pods. Exposes a client-facing NodePort (<code>30001</code>) and
@@ -238,7 +192,7 @@
       <div class="card">
         <!-- <div class="card-icon" style="background:#ECFDF5; color:#065F46;">🔧</div> -->
         <h3>Rexec Server Deploy API</h3>
-        <span class="badge badge-green" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
+        <span class="badge badge-blue" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
         <p>
           A FastAPI service that provisions and tears down per-user <code>rexec-server</code>
           pods in Kubernetes. Accepts Bearer token auth and supports group-based access
@@ -251,7 +205,7 @@
       <div class="card">
         <!-- <div class="card-icon" style="background:#FFF7ED; color:#92400E;">🌐</div> -->
         <h3>NDP Endpoint API</h3>
-        <span class="badge badge-green" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
+        <span class="badge badge-blue" style="margin-bottom:.75rem; display:inline-block;">FastAPI</span>
         <p>
           The NDP Endpoint API providing dataset search, authentication, and the
           Rexec spawn API address to clients. Supports CKAN, MongoDB, Kafka, S3,
@@ -269,8 +223,8 @@
 <section class="section section-alt">
   <div class="container">
     <div class="section-header">
-      <h2>Quick Start in 60 Seconds</h2>
-      <p>If you have access to an NDP Endpoint with rexec support, you're one <code>pip install</code> away.</p>
+      <h2>Quick Start</h2>
+      <p>The following example assumes access to an NDP Endpoint with remote execution enabled. Install the client library, connect to the endpoint, and submit a function for remote execution.</p>
     </div>
     <div style="max-width:680px; margin:0 auto;">
       <div class="pre-wrap">
@@ -301,12 +255,12 @@ client.setup_rexec_environment( requirements=<span class="str">"input_requiremen
     <span class="kw">return</span> steps
 
 result = collatz_steps(<span class="num">27</span>)
-print(f<span class="str">"Collatz(27) halts in {result} steps"</span>)</code></pre>
+print(f<span class="str">"collatz_steps(27) = {result}"</span>)</code></pre>
       </div>
       <div style="text-align:center; margin-top:1.5rem;">
-        <a class="btn btn-blue" href="user-guide.html">Full User Guide →</a>
+        <a class="btn btn-blue" href="user-guide.html">Full User Guide</a>
         &nbsp;
-        <a class="btn" style="border:1px solid var(--border);" href="user-guide.html#notebooks">View Example Notebooks</a>
+        <a class="btn" style="border:1px solid var(--border);" href="user-guide.html#notebooks">Example Notebooks</a>
       </div>
     </div>
   </div>
@@ -319,14 +273,19 @@ print(f<span class="str">"Collatz(27) halts in {result} steps"</span>)</code></p
       <div class="footer-brand">SciDx Remote Execution</div>
       <p class="footer-desc">
         Open-source remote code execution for the National Data Platform ecosystem.
-        Built for scientists.
       </p>
-      <p class="footer-contact">Contact — <a href="mailto:yutian.qin@utah.edu">yutian.qin@utah.edu</a></p>
+      <address class="footer-contact">
+        <span class="footer-contact-label">Contact</span>
+        Yutian Qin<br />
+        Scientific Computing and Imaging Institute at the University of Utah<br />
+        <a href="mailto:yutian.qin@utah.edu">yutian.qin@utah.edu</a>
+      </address>
     </div>
     <div class="footer-links">
       <div class="footer-col">
         <h5>Guides</h5>
         <ul>
+          <li><a href="how-it-works.html">How Rexec Works</a></li>
           <li><a href="user-guide.html">End User Guide</a></li>
           <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
           <li><a href="developer-guide.html">Developer Guide</a></li>
@@ -338,16 +297,6 @@ print(f<span class="str">"Collatz(27) halts in {result} steps"</span>)</code></p
           <li><a href="architecture.html">Architecture</a></li>
           <li><a href="helm-chart.html">Helm Chart</a></li>
           <li><a href="api-reference.html">API Reference</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Source</h5>
-        <ul>
-          <li><a href="https://github.com/sci-ndp/rexec" target="_blank">This Repo</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">RExec Client Lib</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">RExec Broker</a></li>
-          <li><a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">RExec Server</a></li>
-          <li><a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">Server Deploy API</a></li>
         </ul>
       </div>
     </div>
