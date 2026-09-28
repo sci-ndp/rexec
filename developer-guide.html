@@ -6,7 +6,6 @@
   <title>Developer Guide - Remote Execution</title>
   <meta name="description" content="Developer guide for contributing to and extending the SciDx Rexec ecosystem." />
   <link rel="stylesheet" href="assets/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23001642'/><text x='50' y='68' font-family='monospace' font-size='52' font-weight='700' fill='%23ffffff' text-anchor='middle'>Rx</text></svg>" />
 </head>
 <body class="page-body">
 
@@ -16,23 +15,27 @@
     Remote Execution
   </a>
   <ul class="nav-links">
+    <li><a href="how-it-works.html">How It Works</a></li>
     <li><a href="user-guide.html">User Guide</a></li>
-    <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
-    <li><a href="developer-guide.html" class="active">Developer</a></li>
-    <li><a href="architecture.html">Architecture</a></li>
-    <li><a href="helm-chart.html">Helm Chart</a></li>
-    <li><a href="api-reference.html">API Reference</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle active" type="button" aria-haspopup="true">Reference <span class="nav-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav-dropdown-menu">
+        <li><a href="api-reference.html">API Reference</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="developer-guide.html" class="active">Developer Guide</a></li>
+        <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+        <li><a href="helm-chart.html">Helm Chart</a></li>
+      </ul>
+    </li>
   </ul>
-  <span class="nav-version">v0.0.9-alpha</span>
   <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
     <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
   </a>
-  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub ↗</a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
 </header>
 
 <section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#0D1829 0%,#1A2B4A 60%,#0D2D6E 100%);">
   <div class="hero-inner">
-    <div class="hero-badge">Rexec Developer</div>
     <h1>Developer Guide</h1>
     <p>Set up a local development stack, understand the codebase structure, and contribute to the SciDx Rexec ecosystem.</p>
   </div>
@@ -71,7 +74,7 @@
   <main class="doc-content">
 
     <h2 id="source-repos">Source Repositories</h2>
-    <p>The Rexec ecosystem is spread across four GitHub repositories. Each has a distinct responsibility:</p>
+    <p>The Rexec ecosystem is spread across several GitHub repositories. Each has a distinct responsibility:</p>
 
     <div class="table-wrap">
       <table>
@@ -79,6 +82,12 @@
           <tr><th>Repo</th><th>Role</th><th>Language</th><th>Link</th></tr>
         </thead>
         <tbody>
+          <tr>
+            <td>rexec</td>
+            <td>This meta-repo. Umbrella Helm chart, example notebooks, and this documentation site; no runtime source code (see <a href="#repo-map">Repository Map</a>).</td>
+            <td>Helm / Jupyter</td>
+            <td><a href="https://github.com/sci-ndp/rexec" target="_blank">sci-ndp/rexec ↗</a></td>
+          </tr>
           <tr>
             <td>ndp-ep-py</td>
             <td>NDP Endpoint Python client library. High-level interface users interact with; pulls in <code>scidx-rexec</code> as an extra.</td>
@@ -491,12 +500,18 @@ helm upgrade --install rexec ./helm/rexec -f ./helm/rexec/values.yaml -n rexec -
     <div>
       <div class="footer-brand">SciDx Remote Execution</div>
       <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
-      <p class="footer-contact">Contact — <a href="mailto:yutian.qin@utah.edu">yutian.qin@utah.edu</a></p>
+      <address class="footer-contact">
+        <span class="footer-contact-label">Contact</span>
+        Yutian Qin<br />
+        Scientific Computing and Imaging Institute at the University of Utah<br />
+        <a href="mailto:yutian.qin@utah.edu">yutian.qin@utah.edu</a>
+      </address>
     </div>
     <div class="footer-links">
       <div class="footer-col">
         <h5>Guides</h5>
         <ul>
+          <li><a href="how-it-works.html">How Rexec Works</a></li>
           <li><a href="user-guide.html">End User Guide</a></li>
           <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
           <li><a href="developer-guide.html">Developer Guide</a></li>

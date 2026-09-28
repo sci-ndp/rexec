@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works - Remote Execution</title>
+  <meta name="description" content="The Rexec execution model: what a remote call sends, where it runs, what carries over between calls, and what happens when something fails." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    /* Page-specific components */
+    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.75rem; margin: 1.5rem 0 .75rem; }
+    .flow-step { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; }
+    .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -1.35rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.1rem; }
+    .flow-label { font-weight: 700; color: var(--navy); margin-bottom: .35rem; }
+    .flow-step p { font-size: .85rem; color: var(--muted); margin: 0; }
+    .flow-caption { font-size: .85rem; color: var(--muted); text-align: center; }
+    .meta-line { font-size: .8rem; color: var(--muted); border-left: 3px solid var(--border); padding-left: .75rem; }
+
+    .rules { list-style: none; padding: 0; counter-reset: rule; display: grid; gap: .6rem; }
+    .rules li { counter-increment: rule; position: relative; margin: 0; padding: .8rem 1rem .8rem 3.1rem; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: .92rem; }
+    .rules li::before { content: counter(rule); position: absolute; left: .9rem; top: .8rem; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--blue); color: #fff; font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .rules li strong { color: var(--navy); }
+    .rules li a { font-size: .82rem; white-space: nowrap; }
+
+    .check-card h4 { margin-bottom: .5rem; }
+    .check-card ul { font-size: .88rem; margin-bottom: 0; }
+    .check-card.yes { border-top: 3px solid var(--green); }
+    .check-card.no  { border-top: 3px solid var(--red); }
+
+    /* Tables whose first column is prose rather than code */
+    table.plain-first td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); font-weight: 500; }
+    td { vertical-align: top; }
+
+    .maintainer-note { border: 1px dashed var(--orange); background: #FFF7ED; color: #7C2D12; border-radius: var(--radius-md); padding: .75rem 1rem; font-size: .85rem; margin-bottom: 1.25rem; }
+    .maintainer-note::before { content: "Maintainer note: remove before publishing"; display: block; font-weight: 700; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .25rem; }
+
+    @media (max-width: 768px) {
+      .flow { grid-template-columns: 1fr; gap: 1.5rem; }
+      .flow-step:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -1.45rem; transform: translateX(-50%); }
+    }
+  </style>
+</head>
+<body class="page-body">
+
+<!-- ── Navigation ───────────────────────────────────────────── -->
+<header class="nav">
+  <a class="nav-brand" href="index.html">
+    <img class="nav-brand-icon" src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
+    Remote Execution
+  </a>
+  <ul class="nav-links">
+    <li><a href="how-it-works.html" class="active">How It Works</a></li>
+    <li><a href="user-guide.html">User Guide</a></li>
+    <li class="nav-dropdown">
+      <button class="nav-dropdown-toggle" type="button" aria-haspopup="true">Reference <span class="nav-caret" aria-hidden="true">▾</span></button>
+      <ul class="nav-dropdown-menu">
+        <li><a href="api-reference.html">API Reference</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+        <li><a href="developer-guide.html">Developer Guide</a></li>
+        <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+        <li><a href="helm-chart.html">Helm Chart</a></li>
+      </ul>
+    </li>
+  </ul>
+  <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+    <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+  </a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
+</header>
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
+  <div class="hero-inner">
+    <h1>How Rexec Works</h1>
+    <p>What happens when you call a remote function: what gets sent, where it runs, what carries over between calls, and what you'll see when something fails.</p>
+  </div>
+</section>
+
+<!-- ── Doc layout ────────────────────────────────────────────── -->
+<div class="doc-layout">
+
+  <!-- Sidebar -->
+  <aside class="doc-sidebar">
+    <nav>
+      <div class="sidebar-section">Overview</div>
+      <ul>
+        <li><a href="#big-picture">The Big Picture</a></li>
+        <li><a href="#rules">Rules at a Glance</a></li>
+      </ul>
+      <div class="sidebar-section">Details</div>
+      <ul>
+        <li><a href="#calls">Remote Calls</a></li>
+        <li><a href="#environment">Your Environment</a></li>
+        <li><a href="#state">State Between Calls</a></li>
+        <li><a href="#lifecycle">Lifecycle</a></li>
+        <li><a href="#failures">When Things Fail</a></li>
+        <li><a href="#isolation">Isolation &amp; Limits</a></li>
+      </ul>
+      <div class="sidebar-section">Status</div>
+      <ul>
+        <li><a href="#not-yet">Not Yet Supported</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Content -->
+  <main class="doc-content">
+
+    <!-- ── Big picture ─────────────────────────────────────── -->
+    <h2 id="big-picture">The Big Picture</h2>
+    <p>
+      Rexec turns a decorated Python function into a remote call. You get one dedicated server on the
+      cluster. Each time you call the function, its code and arguments are serialized on your machine,
+      routed through the broker to your server, and run there in a new process.
+    </p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-label">Your notebook</div>
+        <p><code>@remote_func</code> serializes the function and its arguments with dill.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-label">Broker</div>
+        <p>Checks your token on every message and routes the call to your server by user ID.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-label">Your server pod</div>
+        <p>One per user. Runs calls one at a time, in the order they arrive.</p>
+      </div>
+      <div class="flow-step">
+        <div class="flow-label">Fresh process</div>
+        <p>Runs the function, streams stdout and stderr, then sends the return value or the error.</p>
+      </div>
+    </div>
+    <p class="flow-caption">Output travels back the same way: printed output while the function runs, then the result.</p>
+
+    <p class="meta-line">
+      Describes Rexec v0.0.9-alpha:
+      <a href="https://github.com/sci-ndp/SciDx-rexec" target="_blank">scidx-rexec</a> 0.0.9,
+      <a href="https://github.com/sci-ndp/SciDx-rexec-broker" target="_blank">broker</a> 0.0.8,
+      <a href="https://github.com/sci-ndp/SciDx-rexec-server" target="_blank">server</a>,
+      <a href="https://github.com/sci-ndp/rexec-server-k8s-deployment-api" target="_blank">Deploy API</a> 0.0.9 and
+      <a href="https://github.com/sci-ndp/ndp-ep-py" target="_blank">ndp_ep</a>.
+      Checked against the source code on September 25, 2026.
+    </p>
+
+    <!-- ── Rules ───────────────────────────────────────────── -->
+    <h2 id="rules">Rules at a Glance</h2>
+    <p>These nine rules cover what Rexec does with your code. Each one links to the details.</p>
+    <ol class="rules">
+      <li><strong>One server per user, shared by all your sessions.</strong> Every notebook and script signed in as you sends its calls to the same server. <a href="#environment">Details →</a></li>
+      <li><strong>The server's Python version must match yours.</strong> Pin it in your requirements (for example <code>python==3.11</code>). Functions travel as Python bytecode, which changes between versions. <a href="#environment">Details →</a></li>
+      <li><strong>A call sends the function and its arguments, nothing else.</strong> Top-level imports, global variables and helper functions from your notebook stay behind. Put them inside the function or pass them in. <a href="#calls">Details →</a></li>
+      <li><strong>Arguments are positional only.</strong> <code>f(16)</code> works; <code>f(x=16)</code> raises <code>TypeError</code>. <a href="#calls">Details →</a></li>
+      <li><strong>Output streams back live; the result arrives at the end.</strong> Printed output appears while the function runs. Exceptions come back as <code>RuntimeError</code>. <a href="#calls">Details →</a></li>
+      <li><strong>Calls run one at a time, in arrival order.</strong> A second call waits until the first one finishes. <a href="#state">Details →</a></li>
+      <li><strong>Each call starts in a fresh process.</strong> Variables from earlier calls are gone. Files written to the server's disk stay until the server restarts, is replaced or is terminated. <a href="#state">Details →</a></li>
+      <li><strong>Calls are never retried and never time out.</strong> If the server or broker goes down during a call, the call waits until you interrupt it. <a href="#failures">Details →</a></li>
+      <li><strong>Your server runs until you stop it.</strong> There is no idle shutdown. Call <code>terminate_rexec_environment()</code> when you're done. <a href="#lifecycle">Details →</a></li>
+    </ol>
+
+    <!-- ── Remote calls ────────────────────────────────────── -->
+    <h2 id="calls">Remote Calls</h2>
+    <p>
+      Decorating a function with <code>@remote_func</code> replaces it with a remote call. Calling it
+      serializes the function and its arguments with <a href="https://github.com/uqfoundation/dill" target="_blank">dill</a>,
+      sends them to the broker with your token, and waits for your server to answer.
+    </p>
+
+    <h3>What travels with a call</h3>
+    <div class="grid grid-2" style="margin-bottom:1.25rem;">
+      <div class="card check-card yes" style="padding:1.1rem;">
+        <h4>Sent to the server</h4>
+        <ul>
+          <li>The function's code, if it is defined in the notebook or script you run</li>
+          <li>Positional arguments</li>
+          <li>Default argument values and closure variables, captured when the function is defined</li>
+          <li>Your token, which the broker checks on every message</li>
+        </ul>
+      </div>
+      <div class="card check-card no" style="padding:1.1rem;">
+        <h4>Not sent</h4>
+        <ul>
+          <li>Imports at the top of your notebook</li>
+          <li>Global variables and helper functions defined elsewhere in the notebook</li>
+          <li>Functions from your own local modules (the server can't import them)</li>
+          <li>Local files and environment variables</li>
+        </ul>
+      </div>
+    </div>
+    <p>On the server, anything the function neither defines nor receives fails with <code>NameError</code>, or <code>ModuleNotFoundError</code> for a local module.</p>
+
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="kw">import</span> math                        <span class="cm"># top-level import: not sent</span>
+SCALE = <span class="num">3</span>                          <span class="cm"># global variable: not sent</span>
+
+<span class="decorator">@remote_func</span>
+<span class="kw">def</span> bad(x):
+    <span class="kw">return</span> math.sqrt(x) * SCALE    <span class="cm"># NameError on the server</span>
+
+<span class="decorator">@remote_func</span>
+<span class="kw">def</span> good(x, scale=SCALE):          <span class="cm"># SCALE's value is captured here</span>
+    <span class="kw">import</span> math                    <span class="cm"># import inside the function</span>
+    <span class="kw">return</span> math.sqrt(x) * scale
+
+good(<span class="num">16</span>)      <span class="cm"># returns 12.0</span>
+good(x=<span class="num">16</span>)    <span class="cm"># TypeError: keyword arguments aren't supported</span></code></pre>
+    </div>
+
+    <h3>What comes back</h3>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table>
+        <thead><tr><th>On the server</th><th>What you see locally</th></tr></thead>
+        <tbody>
+          <tr><td>print() / stdout</td><td>Printed in your notebook while the function runs.</td></tr>
+          <tr><td>stderr</td><td>Written to your local stderr while the function runs.</td></tr>
+          <tr><td>return value</td><td>Returned by the call when the function finishes. A function that returns nothing gives <code>None</code>.</td></tr>
+          <tr><td>raise</td><td><code>RuntimeError("An unexpected error occurred: &lt;message&gt;")</code>, raised after any streamed output. The original exception type and traceback stay in the server's logs.</td></tr>
+          <tr><td>yield</td><td>Not supported. Yielded values are dropped and the call returns <code>None</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-info">
+      <span class="callout-icon">ⓘ</span>
+      <div class="callout-body">
+        <strong>Both sides need the libraries.</strong>
+        Arguments and return values must be picklable, and their packages must be installed on both
+        sides. Returning a pandas DataFrame, for example, needs pandas on your machine too.
+      </div>
+    </div>
+
+    <h3>Interrupting a call</h3>
+    <p>
+      Stopping the cell (Ctrl-C, or the stop button in Jupyter) cancels the call. The server terminates
+      the process running it (SIGTERM, then SIGKILL after half a second) and <code>KeyboardInterrupt</code>
+      is raised locally.
+    </p>
+
+    <!-- ── Environment ─────────────────────────────────────── -->
+    <h2 id="environment">Your Environment</h2>
+    <p>
+      <code>setup_rexec_environment()</code> asks the Deploy API for a server built from your requirements.
+      The server is identified by your user ID (the <code>sub</code> claim in your token), so you have
+      exactly one, and every session signed in as you uses it.
+    </p>
+
+    <h3>What's installed</h3>
+    <ul>
+      <li>The official <code>python:&lt;version&gt;</code> container image, for the version you pin.</li>
+      <li><code>scidx-rexec</code> and its dependencies (dill, pyzmq, dxspaces, packaging, cryptography).</li>
+      <li>Your requirements, installed with <code>pip install -r</code>.</li>
+    </ul>
+
+    <h3>Requirements file rules</h3>
+    <ul>
+      <li><strong>Pin Python exactly</strong> with one <code>python==X.Y</code> line, matching your local Python's major and minor version.</li>
+      <li>Use standard pip requirement lines. Direct URL references (<code>pkg @ https://…</code>) are rejected.</li>
+      <li>Full-line <code>#</code> comments are fine. Comments at the end of a line are not, and make <code>setup_rexec_environment()</code> raise <code>InvalidRequirement</code>.</li>
+      <li>Line order doesn't matter: the same set of lines is the same environment.</li>
+    </ul>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="cm"># requirements.txt</span>
+python==3.11
+numpy==2.1.3
+pandas&gt;=2.2</code></pre>
+    </div>
+    <div class="callout callout-danger">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>A Python version mismatch breaks calls.</strong>
+        A function sent from Python 3.13 to a 3.11 server doesn't run. Depending on the versions, the call
+        prints <code>Invalid function payload: …</code> and returns <code>None</code>, or it crashes the
+        server process and the call hangs.
+      </div>
+    </div>
+
+    <h3>What <code>setup_rexec_environment()</code> does</h3>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-first">
+        <thead><tr><th>Your server</th><th>You ask for</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>None yet</td><td>Any requirements</td><td><strong>Created.</strong> A new pod starts in namespace <code>rexec-server-&lt;user-id&gt;</code>.</td></tr>
+          <tr><td>Running</td><td>The same requirements</td><td><strong>No change.</strong> The running server and its files are untouched.</td></tr>
+          <tr><td>Running</td><td>Different requirements</td><td><strong>Conflict (HTTP 409).</strong> Nothing changes.</td></tr>
+          <tr><td>Running</td><td>Different requirements with <code>force=True</code></td><td><strong>Replaced.</strong> A new pod replaces the old one. A call the old pod was running is interrupted.</td></tr>
+          <tr><td>Any</td><td>Invalid requirements</td><td><strong>Error (HTTP 500)</strong> with the reason, for example a missing <code>python==</code> line.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Conflicts and server-side errors don't raise.</strong>
+        <code>setup_rexec_environment()</code> returns the Deploy API's response whatever happened.
+        Its <code>Status</code> tells you which of the outcomes above you got. A login or permission
+        problem comes back as <code>detail</code> instead.
+      </div>
+    </div>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>resp = ndp_ep_client.setup_rexec_environment(requirements=<span class="str">"requirements.txt"</span>)
+print(resp)    <span class="cm"># {"Status": "...", ...} or {"detail": "..."}</span></code></pre>
+    </div>
+    <div class="maintainer-note">
+      <code>force</code> is in scidx-rexec (<code>remote_func.set_environment(path, token, force=True)</code>),
+      but <code>ndp_ep</code>'s <code>setup_rexec_environment()</code> on GitHub main doesn't accept it yet;
+      it's on branch <code>feat/rexec-force-terminate</code>. Update the table above once that's released.
+    </div>
+
+    <h3>Starting takes a while</h3>
+    <p>
+      <code>setup_rexec_environment()</code> returns as soon as Kubernetes accepts the new server, before the
+      pod has pulled its image and installed your packages. Until the server connects to the broker,
+      calls print <code>Server not ready/available for user &lt;id&gt;.</code> and return <code>None</code>.
+      To wait for it:
+    </p>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code><span class="kw">import</span> time
+
+<span class="decorator">@remote_func</span>
+<span class="kw">def</span> ping():
+    <span class="kw">return</span> <span class="str">"ready"</span>
+
+<span class="kw">while</span> ping() != <span class="str">"ready"</span>:     <span class="cm"># prints "Server not ready…" until the pod is up</span>
+    time.sleep(<span class="num">10</span>)</code></pre>
+    </div>
+
+    <!-- ── State ───────────────────────────────────────────── -->
+    <h2 id="state">State Between Calls</h2>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-first">
+        <thead><tr><th>On your server</th><th>Carries over to the next call?</th></tr></thead>
+        <tbody>
+          <tr><td>Variables, imported modules, objects in memory</td><td><strong>No.</strong> Each call runs in a new process.</td></tr>
+          <tr><td>Files your function writes</td><td><strong>Yes</strong>, until the server restarts, is replaced or is terminated. They share the pod's 2 GiB disk limit with your installed packages.</td></tr>
+          <tr><td>Installed packages</td><td><strong>Yes</strong>, until you replace the server with different requirements.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Order</h3>
+    <p>
+      Your server runs one call at a time, in the order they arrive. A call from another cell, notebook
+      or script waits until the current one finishes.
+    </p>
+    <div class="callout callout-warn">
+      <span class="callout-icon">⚠️</span>
+      <div class="callout-body">
+        <strong>Interrupting affects the shared server.</strong>
+        Interrupting a call stops whichever call is running on your server at that moment, even if another
+        of your sessions started it.
+      </div>
+    </div>
+
+    <!-- ── Lifecycle ───────────────────────────────────────── -->
+    <h2 id="lifecycle">Lifecycle</h2>
+    <p>
+      Rexec doesn't report these states yet (there is no status API). They describe what is happening at
+      each stage.
+    </p>
+
+    <h3>Your server</h3>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table>
+        <thead><tr><th>State</th><th>What it means</th><th>What comes next</th></tr></thead>
+        <tbody>
+          <tr><td>starting</td><td>The pod pulls the Python image, installs packages and starts the Rexec server. Calls print "Server not ready".</td><td>ready, once it connects to the broker</td></tr>
+          <tr><td>ready</td><td>Connected to the broker and idle.</td><td>busy, when a call arrives</td></tr>
+          <tr><td>busy</td><td>Running a call. Other calls wait in line.</td><td>ready, when the queue is empty</td></tr>
+          <tr><td>restarting</td><td>The container crashed or was evicted and Kubernetes restarts it. Files are lost; packages reinstall.</td><td>starting</td></tr>
+          <tr><td>replaced</td><td>You called <code>setup_rexec_environment()</code> with new requirements and <code>force=True</code>.</td><td>starting, as a new pod</td></tr>
+          <tr><td>terminated</td><td>You called <code>terminate_rexec_environment()</code>. Your namespace and everything in it are deleted.</td><td>None. Call <code>setup_rexec_environment()</code> to start again.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      <strong>There is no idle shutdown and no time limit.</strong> A server keeps running, and keeps its
+      resource reservation, until you terminate it. Terminating also kills any call it is running.
+    </p>
+    <div class="pre-wrap">
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+      <pre><code>ndp_ep_client.terminate_rexec_environment()</code></pre>
+    </div>
+    <div class="maintainer-note">
+      plan.md marks "Server Lifecycle &amp; Shutdown" as done, but none of the Rexec repos on GitHub has
+      idle-shutdown or max-duration code. Confirm this paragraph before publishing.
+    </div>
+
+    <h3>A single call</h3>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table>
+        <thead><tr><th>State</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>queued</td><td>Your server is still busy with an earlier call.</td></tr>
+          <tr><td>running</td><td>Executing in a fresh process. Output streams back.</td></tr>
+          <tr><td>completed</td><td>The function returned. The call returns its value, or <code>None</code>.</td></tr>
+          <tr><td>failed</td><td>The function raised, or its process died. The call raises <code>RuntimeError</code>.</td></tr>
+          <tr><td>cancelled</td><td>You interrupted it. The process is terminated and <code>KeyboardInterrupt</code> is raised locally.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ── Failures ────────────────────────────────────────── -->
+    <h2 id="failures">When Things Fail</h2>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-first">
+        <thead><tr><th>What happens</th><th>What you see</th><th>What to do</th></tr></thead>
+        <tbody>
+          <tr><td>Your function raises</td><td><code>RuntimeError: An unexpected error occurred: …</code></td><td>Fix the function. The server keeps running.</td></tr>
+          <tr><td>Your function's process dies, for example killed for using too much memory</td><td><code>RuntimeError: Execution process exited unexpectedly with code N.</code></td><td>Reduce memory use. The server keeps running.</td></tr>
+          <tr><td>The server pod crashes or restarts during a call</td><td>Nothing. The call waits with no result and no error.</td><td>Interrupt the cell. Call again once the server is back (packages reinstall; files are lost).</td></tr>
+          <tr><td>The broker restarts during a call</td><td>Nothing. The call waits.</td><td>Interrupt the cell and call again.</td></tr>
+          <tr><td>No server is running, or it is still starting</td><td>Prints <code>Server not ready/available for user &lt;id&gt;.</code> and returns <code>None</code>.</td><td>Run <code>setup_rexec_environment()</code>, or wait for the server.</td></tr>
+          <tr><td>Your token is invalid or expired</td><td>Prints <code>Token validation failed.</code> and returns <code>None</code>. A call that is already running still returns its result.</td><td>Get a fresh token.</td></tr>
+          <tr><td>The server's Python version doesn't match yours</td><td>Prints <code>Invalid function payload: …</code>, or the server crashes and the call waits.</td><td>Pin your local version in the requirements and replace the server.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-info">
+      <span class="callout-icon">ⓘ</span>
+      <div class="callout-body">
+        <strong>Rexec never retries.</strong>
+        Each call runs at most once. If you call again after a hang, the first attempt may already have
+        run; only its result was lost. Keep that in mind for functions that write files or send data
+        elsewhere.
+      </div>
+    </div>
+
+    <!-- ── Isolation ───────────────────────────────────────── -->
+    <h2 id="isolation">Isolation &amp; Limits</h2>
+
+    <h3>Enforced today</h3>
+    <ul>
+      <li>Your server runs in its own Kubernetes namespace, <code>rexec-server-&lt;user-id&gt;</code>, and each call runs in its own process.</li>
+      <li>Every message to the broker, and every request to create or delete a server, is checked against the identity provider. Your sysadmin can also require membership in a group.</li>
+      <li>Your requirements reach the pod as a file for <code>pip install -r</code>, never through a shell command.</li>
+      <li>Each server pod has fixed resource limits:</li>
+    </ul>
+    <div class="table-wrap" style="margin-bottom:1rem;">
+      <table class="plain-first">
+        <thead><tr><th>Resource</th><th>Reserved</th><th>Maximum</th><th>Over the maximum</th></tr></thead>
+        <tbody>
+          <tr><td>CPU</td><td>0.25 core</td><td>2 cores</td><td>Slowed down (throttled)</td></tr>
+          <tr><td>Memory</td><td>512 MiB</td><td>4 GiB</td><td>The function's process is killed (<code>RuntimeError</code>), or the whole server restarts, depending on the cluster</td></tr>
+          <tr><td>Disk</td><td>512 MiB</td><td>2 GiB</td><td>The pod is evicted and restarted; files are lost</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="text-muted" style="font-size:.875rem;">These are the Deploy API's defaults; your sysadmin can change them. You can't request a different size.</p>
+
+    <h3>Not guaranteed yet</h3>
+    <ul>
+      <li><strong>Network isolation.</strong> Rexec doesn't create a network policy for server pods, so what they can reach, inside the cluster and on the internet, depends entirely on the cluster's own policies. By default, Kubernetes allows all of it.</li>
+      <li><strong>Unprivileged execution.</strong> The server runs as root inside its container.</li>
+      <li><strong>Encrypted transport.</strong> Traffic between your machine and the broker is plain TCP. Rexec doesn't encrypt your token, code or results on that link.</li>
+    </ul>
+
+    <!-- ── Not yet supported ───────────────────────────────── -->
+    <h2 id="not-yet">Not Yet Supported</h2>
+    <div class="table-wrap">
+      <table class="plain-first">
+        <thead><tr><th>Feature</th><th>Today</th></tr></thead>
+        <tbody>
+          <tr><td>Keyword arguments</td><td>Raise <code>TypeError</code>. Pass arguments by position.</td></tr>
+          <tr><td>Generator functions</td><td>Yielded values are dropped; the call returns <code>None</code>.</td></tr>
+          <tr><td>Remote exception type and traceback</td><td>Every error arrives as <code>RuntimeError</code> with the message only.</td></tr>
+          <tr><td>Call timeouts</td><td>A call waits until it gets an answer or you interrupt it.</td></tr>
+          <tr><td>Server status check</td><td>No API. A test call like <code>ping()</code> above tells you whether the server is ready.</td></tr>
+          <tr><td>Idle shutdown and maximum run time</td><td>Servers run until you terminate them.</td></tr>
+          <tr><td>Scheduled or event-triggered calls</td><td>Every call is made directly from your code.</td></tr>
+          <tr><td>DataSpaces-backed arguments (<code>DSDataObj</code>)</td><td>Server pods aren't started with a DataSpaces address, so these arrive as <code>None</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Footer ───────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">SciDx Remote Execution</div>
+      <p class="footer-desc">Open-source remote code execution for the National Data Platform ecosystem.</p>
+      <address class="footer-contact">
+        <span class="footer-contact-label">Contact</span>
+        Yutian Qin<br />
+        Scientific Computing and Imaging Institute at the University of Utah<br />
+        <a href="mailto:yutian.qin@utah.edu">yutian.qin@utah.edu</a>
+      </address>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <h5>Guides</h5>
+        <ul>
+          <li><a href="how-it-works.html">How Rexec Works</a></li>
+          <li><a href="user-guide.html">End User Guide</a></li>
+          <li><a href="sysadmin-guide.html">Sysadmin Guide</a></li>
+          <li><a href="developer-guide.html">Developer Guide</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Reference</h5>
+        <ul>
+          <li><a href="architecture.html">Architecture</a></li>
+          <li><a href="helm-chart.html">Helm Chart</a></li>
+          <li><a href="api-reference.html">API Reference</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <a class="footer-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
+      <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
+    </a>
+    <a href="index.html" style="color:rgba(255,255,255,.6);">← Home</a>
+  </div>
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.pre-wrap').querySelector('pre');
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+// Sidebar active link highlight on scroll
+const sections = document.querySelectorAll('main [id]');
+const links = document.querySelectorAll('.doc-sidebar a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
+  links.forEach(l => {
+    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+
+</body>
+</html>
