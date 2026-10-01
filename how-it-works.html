@@ -8,24 +8,26 @@
   <link rel="stylesheet" href="assets/style.css" />
   <style>
     /* Page-specific components */
-    .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.75rem; margin: 1.5rem 0 .75rem; }
+    .flow { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 1.75rem; margin: 1.5rem 0 .75rem; }
     .flow-step { position: relative; background: var(--card-bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; }
     .flow-step:not(:last-child)::after { content: "→"; position: absolute; right: -1.35rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1.1rem; }
     .flow-label { font-weight: 700; color: var(--navy); margin-bottom: .35rem; }
     .flow-step p { font-size: .85rem; color: var(--muted); margin: 0; }
+    .flow-inner { margin-top: .75rem; background: #fff; border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: .65rem .75rem; }
+    .flow-sublabel { font-weight: 600; font-size: .85rem; color: var(--navy); margin-bottom: .2rem; }
     .flow-caption { font-size: .85rem; color: var(--muted); text-align: center; }
     .meta-line { font-size: .8rem; color: var(--muted); border-left: 3px solid var(--border); padding-left: .75rem; }
 
+    .plain-table td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); }
+    .plain-table td:first-child { width: 40%; }
+    table tbody tr:hover { background: none; }
+    .plain-table .group-row td { background: var(--surface); color: var(--navy); font-weight: 600; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; padding: .55rem 1rem; }
     .rules { list-style: none; padding: 0; counter-reset: rule; display: grid; gap: .6rem; }
     .rules li { counter-increment: rule; position: relative; margin: 0; padding: .8rem 1rem .8rem 3.1rem; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: .92rem; }
     .rules li::before { content: counter(rule) "."; position: absolute; left: 1rem; top: .8rem; width: 1.5rem; text-align: right; color: var(--muted); font-size: .92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
     .rules li strong { color: var(--navy); }
     .rules li a { font-size: .82rem; white-space: nowrap; }
 
-    .check-card h4 { margin-bottom: .5rem; }
-    .check-card ul { font-size: .88rem; margin-bottom: 0; }
-    .check-card.yes { border-top: 3px solid var(--green); }
-    .check-card.no  { border-top: 3px solid var(--red); }
 
     /* Tables whose first column is prose rather than code */
     table.plain-first td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); font-weight: 500; }
@@ -126,10 +128,10 @@
       <div class="flow-step">
         <div class="flow-label">Your server pod</div>
         <p>One per user. Runs calls one at a time, in the order they arrive.</p>
-      </div>
-      <div class="flow-step">
-        <div class="flow-label">Fresh process</div>
-        <p>Runs the function, streams stdout and stderr, then sends the return value or the error.</p>
+        <div class="flow-inner">
+          <div class="flow-sublabel">New process for each call</div>
+          <p>Runs the function, streams stdout and stderr, then sends the return value or the error.</p>
+        </div>
       </div>
     </div>
     <!-- <p class="flow-caption">Output travels back the same way: printed output while the function runs, then the result.</p> -->
@@ -158,45 +160,42 @@
       sends them to the broker with your token, and waits for your server to answer.
     </p>
 
-    <h3>What travels with a call</h3>
-    <div class="grid grid-2" style="margin-bottom:1.25rem;">
-      <div class="card check-card yes" style="padding:1.1rem;">
-        <h4>Sent to the server</h4>
-        <ul>
-          <li>The function's code, if it is defined in the notebook or script you run</li>
-          <li>Positional arguments</li>
-          <li>Default argument values and closure variables, captured when the function is defined</li>
-          <li>Your token, which the broker checks on every message</li>
-        </ul>
-      </div>
-      <div class="card check-card no" style="padding:1.1rem;">
-        <h4>Not sent</h4>
-        <ul>
-          <li>Imports at the top of your notebook</li>
-          <li>Global variables and helper functions defined elsewhere in the notebook</li>
-          <li>Functions from your own local modules (the server can't import them)</li>
-          <li>Local files and environment variables</li>
-        </ul>
-      </div>
+    <h3>Contents of a remote call</h3>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-table">
+        <thead><tr><th>Element</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr class="group-row"><td colspan="2">Transmitted to the server</td></tr>
+          <tr><td>Function code</td><td>Serialized by value if the function is defined in the executing notebook or script.</td></tr>
+          <tr><td>Positional arguments</td><td>Keyword arguments are not supported.</td></tr>
+          <tr><td>Default argument values and closure variables</td><td>Captured at the time the function is defined.</td></tr>
+          <tr><td>Authentication token</td><td>Verified by the broker on every message.</td></tr>
+          <tr class="group-row"><td colspan="2">Not transmitted</td></tr>
+          <tr><td>Module-level imports</td><td>Must be placed within the function body.</td></tr>
+          <tr><td>Global variables and helper functions</td><td>Must be defined within the function body or supplied as arguments.</td></tr>
+          <tr><td>Functions from local modules</td><td>The server cannot import modules that exist only on the client.</td></tr>
+          <tr><td>Local files and environment variables</td><td>Not accessible from the server.</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p>On the server, anything the function neither defines nor receives fails with <code>NameError</code>, or <code>ModuleNotFoundError</code> for a local module.</p>
+    <p class="meta-line">On the server, anything the function neither defines nor receives fails with NameError, or ModuleNotFoundError for a local module.</p>
 
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-      <pre><code><span class="kw">import</span> math                        <span class="cm"># top-level import: not sent</span>
-SCALE = <span class="num">3</span>                          <span class="cm"># global variable: not sent</span>
+      <pre><code><span class="kw">import</span> math <span class="cm"># top-level import: not sent</span>
+SCALE = <span class="num">3</span> <span class="cm"># global variable: not sent</span>
 
 <span class="decorator">@remote_func</span>
 <span class="kw">def</span> bad(x):
-    <span class="kw">return</span> math.sqrt(x) * SCALE    <span class="cm"># NameError on the server</span>
+    <span class="kw">return</span> math.sqrt(x) * SCALE <span class="cm"># NameError on the server</span>
 
 <span class="decorator">@remote_func</span>
-<span class="kw">def</span> good(x, scale=SCALE):          <span class="cm"># SCALE's value is captured here</span>
-    <span class="kw">import</span> math                    <span class="cm"># import inside the function</span>
+<span class="kw">def</span> good(x, scale=SCALE): <span class="cm"># SCALE's value is captured here</span>
+    <span class="kw">import</span> math <span class="cm"># import inside the function</span>
     <span class="kw">return</span> math.sqrt(x) * scale
 
-good(<span class="num">16</span>)      <span class="cm"># returns 12.0</span>
-good(x=<span class="num">16</span>)    <span class="cm"># TypeError: keyword arguments aren't supported</span></code></pre>
+good(<span class="num">16</span>) <span class="cm"># returns 12.0</span>
+good(x=<span class="num">16</span>) <span class="cm"># TypeError: keyword arguments aren't supported</span></code></pre>
     </div>
 
     <h3>What comes back</h3>
