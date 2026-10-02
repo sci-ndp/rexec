@@ -397,6 +397,22 @@ td:first-child { font-family: 'JetBrains Mono', monospace; font-size: .8rem; col
   border-left-color: var(--blue);
   text-decoration: none;
 }
+.doc-sidebar .has-sub { position: relative; }
+.doc-sidebar .has-sub > a { padding-right: 2rem; }
+.doc-sidebar .sub-toggle {
+  position: absolute; top: .2rem; right: .25rem;
+  width: 1.6rem; height: 1.6rem;
+  border: 0; background: none; cursor: pointer;
+  color: var(--muted); font-size: .7rem;
+  transition: transform var(--transition);
+}
+.doc-sidebar .sub-toggle:hover { color: var(--blue); }
+.doc-sidebar .has-sub.open > .sub-toggle { transform: rotate(90deg); }
+.doc-sidebar nav ul.sidebar-sub { display: none; margin: .15rem 0 .4rem .85rem; border-left: 1px solid var(--border); }
+.doc-sidebar .has-sub.open > ul.sidebar-sub { display: block; }
+.doc-sidebar nav ul.sidebar-sub li a { font-size: .8rem; padding: .28rem .75rem; border-left: 0; border-radius: 0; }
+.doc-sidebar nav ul.sidebar-sub li a:hover,
+.doc-sidebar nav ul.sidebar-sub li a.active { background: none; color: var(--blue); }
 .doc-sidebar .sidebar-section {
   font-size: .7rem;
   font-weight: 700;
