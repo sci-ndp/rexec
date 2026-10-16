@@ -6,6 +6,32 @@
   <title>User Guide - Remote Execution</title>
   <meta name="description" content="End user guide for running remote jobs via NDP Endpoint and the Rexec library." />
   <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    /* Page-specific components (shared look with how-it-works.html) */
+    .anno::after { content: attr(data-n); display: inline-block; margin-left: .9rem; width: 1.15rem; height: 1.15rem; line-height: 1.05rem; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; text-align: center; font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.7); vertical-align: 1px; }
+    .code-notes { margin: -.5rem 0 1.5rem; padding-left: 1.5rem; font-size: .88rem; color: var(--text); }
+    .code-notes li { margin-bottom: .3rem; padding-left: .25rem; }
+    .code-notes li::marker { color: var(--muted); font-weight: 600; }
+    main :not(pre) > code { background: none; padding: 0; border: 0; border-radius: 0; color: inherit; font-family: inherit; font-size: inherit; font-weight: 700; }
+    .plain-table td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); }
+    .plain-table.split td:first-child { width: 40%; }
+    table tbody tr:hover { background: none; }
+    .plain-table thead { background: none; color: var(--text); border-bottom: 1px solid var(--border); }
+    .plain-table thead th { font-size: .85rem; font-weight: 600; }
+    .plain-table th:not(:last-child), .plain-table td:not(:last-child) { border-right: 1px solid var(--border); }
+    td { vertical-align: top; }
+
+    .scope-line { font-size: .85rem; color: var(--muted); margin-bottom: 1.75rem; }
+    main .callout { display: block; background: none; border: 0; border-left: 3px solid var(--navy); border-radius: 0; color: var(--text); padding: .2rem 0 .2rem 1.1rem; margin: 1.25rem 0 1.5rem; }
+    main .callout-icon { display: none; }
+    main .callout-body { font-size: .92rem; }
+    main .callout-body::before { display: block; margin-bottom: .3rem; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
+    main .callout-danger .callout-body::before { content: "Important"; }
+    main .callout-warn .callout-body::before { content: "Caution"; }
+    main .callout-info .callout-body::before { content: "Note"; }
+    main .callout-tip .callout-body::before { content: "Tip"; }
+    main .callout-body strong { color: var(--navy); }
+  </style>
 </head>
 <body class="page-body">
 
@@ -31,7 +57,7 @@
   <a class="nav-ndp-logo" href="https://nationaldataplatform.org" target="_blank" title="National Data Platform">
     <img src="https://wagtail.nationaldataplatform.org/media/original_images/National_Data_Platform_horiz_stacked.png" alt="National Data Platform" />
   </a>
-  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>GitHub</a>
+  <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" title="Rexec source code on GitHub" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>sci-ndp/rexec</a>
 </header>
 
 <!-- ── Hero ─────────────────────────────────────────────────── -->
@@ -51,19 +77,51 @@
       <div class="sidebar-section">Getting Started</div>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li class="has-sub">
+          <a href="#installation">Installation</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#install-verify">Verify installation</a></li>
+          </ul>
+        </li>
         <li><a href="#what-you-need">What You Need</a></li>
       </ul>
       <div class="sidebar-section">Usage</div>
       <ul>
-        <li><a href="#via-ndp-endpoint">Via NDP Endpoint</a></li>
+        <li class="has-sub">
+          <a href="#via-ndp-endpoint">Via NDP Endpoint</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#usage-connect">Connect to an endpoint</a></li>
+            <li><a href="#usage-provision">Provision the environment</a></li>
+            <li><a href="#usage-call">Define and call a function</a></li>
+          </ul>
+        </li>
         <li><a href="#notebooks">Example Notebooks</a></li>
       </ul>
       <div class="sidebar-section">Reference</div>
       <ul>
         <li><a href="#auth">Authentication</a></li>
-        <li><a href="#troubleshooting">Troubleshooting</a></li>
-        <li><a href="#faq">FAQ</a></li>
+        <li class="has-sub">
+          <a href="#troubleshooting">Troubleshooting</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#ts-timeout">Connection timeout</a></li>
+            <li><a href="#ts-module">ModuleNotFoundError</a></li>
+            <li><a href="#ts-zsh">zsh: no matches found</a></li>
+            <li><a href="#ts-auth">Authentication error</a></li>
+          </ul>
+        </li>
+        <li class="has-sub">
+          <a href="#faq">FAQ</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#faq-pod">Managing the server pod</a></li>
+            <li><a href="#faq-script">Using plain Python scripts</a></li>
+            <li><a href="#faq-packages">Packages on the server</a></li>
+            <li><a href="#faq-encryption">Network encryption</a></li>
+          </ul>
+        </li>
       </ul>
     </nav>
   </aside>
@@ -71,27 +129,24 @@
   <!-- Content -->
   <main class="doc-content">
 
+    <p class="scope-line">This guide covers installing and using the Rexec client library, <code>scidx-rexec</code> 0.1.0, through <code>ndp-ep</code> 0.8.1. For what happens during a remote call, see <a href="how-it-works.html">How It Works</a>.</p>
+
+    <!-- ── Prerequisites ───────────────────────────────────── -->
     <h2 id="prerequisites">Prerequisites</h2>
     <p>Before you begin, ensure you have the following:</p>
-    <div class="grid grid-2" style="margin-bottom:1.5rem;">
-      <div class="card" style="padding:1.1rem;">
-        <h4>Python ≥ 3.9</h4>
-        <p style="font-size:.875rem;">Required to install and run the <code>ndp_ep</code> library.</p>
-      </div>
-      <div class="card" style="padding:1.1rem;">
-        <h4>Bearer Token</h4>
-        <p style="font-size:.875rem;">An NDP identity token to authenticate against the NDP Endpoint. Obtain one from your NDP Endpoint provider.</p>
-      </div>
-      <div class="card" style="padding:1.1rem;">
-        <h4>NDP Endpoint URL</h4>
-        <p style="font-size:.875rem;">The URL of an NDP Endpoint instance that has Rexec enabled. Your sysadmin provides this.</p>
-      </div>
-      <div class="card" style="padding:1.1rem;">
-        <h4>Jupyter (optional)</h4>
-        <p style="font-size:.875rem;">Recommended for interactive use. Any Jupyter Notebook environment works (local, JupyterHub, VS Code).</p>
-      </div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-table split">
+        <thead><tr><th>Requirement</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>Python 3.9 or later</td><td>Required to install and run the <code>ndp_ep</code> library.</td></tr>
+          <tr><td>Bearer token</td><td>An NDP identity token to authenticate against the NDP Endpoint. Obtain one from your NDP Endpoint provider.</td></tr>
+          <tr><td>NDP Endpoint URL</td><td>The URL of an NDP Endpoint instance that has Rexec enabled. Your sysadmin provides this.</td></tr>
+          <tr><td>Jupyter (optional)</td><td>Recommended for interactive use. Any Jupyter Notebook environment works (local, JupyterHub, VS Code).</td></tr>
+        </tbody>
+      </table>
     </div>
 
+    <!-- ── Installation ────────────────────────────────────── -->
     <h2 id="installation">Installation</h2>
     <p>
       The recommended path is installing <strong>ndp_ep</strong> with the <code>rexec</code> extra,
@@ -112,9 +167,8 @@
     </div>
     <div class="tab-panel" id="tab-zsh">
       <div class="callout callout-warn">
-        <span class="callout-icon">⚠️</span>
         <div class="callout-body">
-          <strong>zsh glob expansion</strong>
+          <strong>zsh glob expansion.</strong>
           In zsh, square brackets are interpreted as glob patterns. Wrap extras in double quotes.
         </div>
       </div>
@@ -133,41 +187,37 @@ pip install "ndp_ep[rexec]"</code></pre>
       </div>
     </div>
 
-    <div class="callout callout-info" style="margin-top:.5rem;">
-      <span class="callout-icon">ⓘ</span>
+    <div class="callout callout-info">
       <div class="callout-body">
-        <strong>What gets installed</strong>
+        <strong>What gets installed.</strong>
         <code>ndp_ep</code> (the NDP Endpoint Python client) and <code>scidx-rexec</code>
         (the Rexec client library, pulled in as a dependency).
       </div>
     </div>
 
-    <h3>Verify installation</h3>
+    <h3 id="install-verify">Verify installation</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
       <pre><code>python -c "import ndp_ep; print('ndp_ep OK'); import rexec; print('rexec OK')"</code></pre>
     </div>
 
+    <!-- ── What you need ───────────────────────────────────── -->
     <h2 id="what-you-need">What You Need From Your Sysadmin</h2>
-    <div class="callout callout-tip">
-      <span class="callout-icon">💡</span>
-      <div class="callout-body">
-        Before running jobs, ask your NDP Endpoint Provider (sysadmin) for:
-        <ul style="margin:.4rem 0 0; padding-left:1.2rem;">
-          <li>The <strong>Endpoint URL</strong> (e.g. <code>https://ndp-endpoint.example.org/api</code>)</li>
-          <li>Your <strong>Bearer token</strong> (obtained from the identity provider)</li>
-          <li>Confirmation that <strong>Rexec is enabled</strong> on the endpoint (<code>REXEC_CONNECTION=True</code>)</li>
-        </ul>
-      </div>
-    </div>
+    <p>Before running jobs, ask your NDP Endpoint Provider (sysadmin) for:</p>
+    <ul>
+      <li>The <strong>Endpoint URL</strong> (e.g. <code>https://ndp-endpoint.example.org/api</code>)</li>
+      <li>Your <strong>Bearer token</strong> (obtained from the identity provider)</li>
+      <li>Confirmation that <strong>Rexec is enabled</strong> on the endpoint (<code>REXEC_CONNECTION=True</code>)</li>
+    </ul>
 
+    <!-- ── Usage ───────────────────────────────────────────── -->
     <h2 id="via-ndp-endpoint">Using Rexec via NDP Endpoint</h2>
     <p>
       The primary way to use Rexec is through the <code>ndp_ep</code> library, which orchestrates
       authentication, server provisioning, and job dispatch in one place.
     </p>
 
-    <h3>Connect to an Endpoint</h3>
+    <h3 id="usage-connect">Connect to an endpoint</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
       <pre><code><span class="kw">from</span> ndp_ep <span class="kw">import</span> APIClient, remote_func
@@ -178,16 +228,15 @@ ndp_ep_client = APIClient(
 )</code></pre>
     </div>
 
-    <h3>Provision the Remote Environment(rexec server)</h3>
+    <h3 id="usage-provision">Provision the remote environment (Rexec server)</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-      <pre><code>ndp_ep_client.setup_rexec_environment( requirements=<span class="str">"input_requirements.txt"</span> )</code></pre>
+      <pre><code>ndp_ep_client.setup_rexec_environment(requirements=<span class="str">"input_requirements.txt"</span>)</code></pre>
     </div>
 
-    <h3>Define and Send a Remote Function</h3>
+    <h3 id="usage-call">Define and call a remote function</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-
       <pre><code><span class="decorator">@remote_func</span>
 <span class="kw">def</span> compute_pi(n: int) -> float:
     <span class="str">"""Estimate pi using Leibniz series."""</span>
@@ -196,50 +245,35 @@ ndp_ep_client = APIClient(
         pi += (-<span class="num">1</span>)**i / (<span class="num">2</span>*i + <span class="num">1</span>)
     <span class="kw">return</span> <span class="num">4</span> * pi
 
-<span class="cm"># Simply invoke the function, it serialized the wrapped func and send it to remote Rexec server</span>
-result = compute_pi(<span class="num">10000000</span>)
+result = compute_pi(<span class="num">10000000</span>)<span class="anno" data-n="1"></span>
 print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
     </div>
+    <ol class="code-notes">
+      <li>Calling the function serializes it with its arguments, sends it to your Rexec server, and returns the result.</li>
+    </ol>
 
-    <h2 id="notebooks" style="scroll-margin-top: 80px;">Example Notebooks</h2>
+    <!-- ── Notebooks ───────────────────────────────────────── -->
+    <h2 id="notebooks">Example Notebooks</h2>
     <p>Two example notebooks are included in the repository to help you get started:</p>
-
-    <div class="grid grid-2">
-      <div class="card">
-        <div class="card-icon" style="background:#EEF4FF;color:var(--blue);">📘</div>
-        <h4><code>rexec_quickstart.ipynb</code></h4>
-        <p>
-          The recommended starting point. Walks through connecting to an NDP Endpoint,
-          authenticating, and submitting jobs using the <code>ndp_ep</code> library.
-        </p>
-        <div style="margin-top:.75rem;">
-          <a href="https://github.com/sci-ndp/rexec/blob/main/user/rexec_quickstart.ipynb" target="_blank" class="btn btn-blue" style="font-size:.8rem; padding:.35rem .9rem;">View on GitHub ↗</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-icon" style="background:#ECFDF5;color:#065F46;">📚</div>
-        <h4><code>search_dataset.ipynb</code></h4>
-        <p>
-          Shows how to search for and work with datasets through the NDP Endpoint,
-          demonstrating dataset discovery and retrieval workflows.
-        </p>
-        <div style="margin-top:.75rem;">
-          <a href="https://github.com/sci-ndp/rexec/blob/main/user/search_dataset.ipynb" target="_blank" class="btn btn-blue" style="font-size:.8rem; padding:.35rem .9rem; background:#065F46;">View on GitHub ↗</a>
-        </div>
-      </div>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-table split">
+        <thead><tr><th>Notebook</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/sci-ndp/rexec/blob/main/user/rexec_quickstart.ipynb" target="_blank">rexec_quickstart.ipynb ↗</a></td><td>The recommended starting point. Walks through connecting to an NDP Endpoint, authenticating, and submitting jobs using the <code>ndp_ep</code> library.</td></tr>
+          <tr><td><a href="https://github.com/sci-ndp/rexec/blob/main/user/search_dataset.ipynb" target="_blank">search_dataset.ipynb ↗</a></td><td>Shows how to search for and work with datasets through the NDP Endpoint, demonstrating dataset discovery and retrieval workflows.</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <div class="callout callout-tip" style="margin-top:1.5rem;">
-      <span class="callout-icon">💡</span>
+    <div class="callout callout-tip">
       <div class="callout-body">
-        <strong>Open in Jupyter</strong>
+        <strong>Open in Jupyter.</strong>
         Download the notebooks and open them locally:
         <code>jupyter notebook rexec_quickstart.ipynb</code>
       </div>
     </div>
 
     <div class="callout callout-info">
-      <span class="callout-icon">💡</span>
       <div class="callout-body">
         <strong>Contributing or testing the rexec library directly?</strong>
         See the <a href="developer-guide.html#direct-lib-testing">Developer Guide → Testing scidx-rexec directly</a>
@@ -247,15 +281,16 @@ print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
       </div>
     </div>
 
+    <!-- ── Authentication ──────────────────────────────────── -->
     <h2 id="auth">Authentication</h2>
     <p>
       All requests are authenticated via <strong>Bearer tokens</strong>. The NDP identity
       provider issues these tokens. The token is validated by the broker, deploy API, and
       NDP Endpoint API, all using the same <code>AUTH_API_URL</code>.
     </p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Component</th><th>How Auth is Used</th></tr></thead>
+    <div class="table-wrap" style="margin-bottom:1.25rem;">
+      <table class="plain-table split">
+        <thead><tr><th>Component</th><th>How auth is used</th></tr></thead>
         <tbody>
           <tr><td>Rexec Broker</td><td>Validates token before routing messages</td></tr>
           <tr><td>Deploy API</td><td>Validates token; checks group membership if ACL enabled</td></tr>
@@ -263,19 +298,19 @@ print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
         </tbody>
       </table>
     </div>
-    <div class="callout callout-info" style="margin-top:1rem;">
-      <span class="callout-icon">ⓘ</span>
+    <div class="callout callout-info">
       <div class="callout-body">
-        <strong>Test token</strong>
+        <strong>Test token.</strong>
         For initial testing you can use the test IDP at
         <code>https://idp-test.nationaldataplatform.org/temp/information</code>.
         Ask your sysadmin whether the endpoint uses the production or test IDP.
       </div>
     </div>
 
+    <!-- ── Troubleshooting ─────────────────────────────────── -->
     <h2 id="troubleshooting">Troubleshooting</h2>
 
-    <h3>Connection timeout</h3>
+    <h3 id="ts-timeout">Connection timeout</h3>
     <p>
       If <code>remote func invocation</code> hangs or times out, check that:
     </p>
@@ -285,59 +320,52 @@ print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
       <li>The NDP Endpoint has <code>REXEC_CONNECTION=True</code> in its configuration</li>
     </ul>
 
-    <h3>ModuleNotFoundError: scidx_rexec</h3>
+    <h3 id="ts-module">ModuleNotFoundError: scidx_rexec</h3>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
       <pre><code>pip install "ndp_ep[rexec]"  <span class="cm"># re-install with the rexec extra</span></code></pre>
     </div>
 
-    <h3>zsh: no matches found: ndp_ep[rexec]</h3>
+    <h3 id="ts-zsh">zsh: no matches found: ndp_ep[rexec]</h3>
     <p>Wrap the package name in double quotes so zsh doesn't interpret the brackets as globs:</p>
     <div class="pre-wrap">
       <button class="copy-btn" onclick="copyCode(this)">Copy</button>
       <pre><code>pip install <span class="str">"ndp_ep[rexec]"</span></code></pre>
     </div>
 
-    <h3>Authentication error (401 / 403)</h3>
+    <h3 id="ts-auth">Authentication error (401 / 403)</h3>
     <ul>
       <li>Ensure your token hasn't expired — obtain a fresh token from your identity provider</li>
       <li>If using group-based access: confirm your account belongs to the configured group</li>
     </ul>
 
+    <!-- ── FAQ ─────────────────────────────────────────────── -->
     <h2 id="faq">FAQ</h2>
 
-    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
-      <summary style="font-weight:600; cursor:pointer;">Do I need to manage the server pod myself?</summary>
-      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
-        No. When using the NDP Endpoint path, the Deploy API automatically provisions and tears
-        down a dedicated server pod for your session. You never interact with Kubernetes directly.
-      </p>
-    </details>
+    <h3 id="faq-pod">Do I need to manage the server pod myself?</h3>
+    <p>
+      No. When using the NDP Endpoint path, the Deploy API automatically provisions and tears
+      down a dedicated server pod for your session. You never interact with Kubernetes directly.
+    </p>
 
-    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
-      <summary style="font-weight:600; cursor:pointer;">Can I use Rexec from a plain Python script (not a notebook)?</summary>
-      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
-        Yes. <code>ndp_ep</code> and <code>scidx-rexec</code> are plain Python libraries
-        and work in any Python environment — scripts, notebooks, or CI pipelines.
-      </p>
-    </details>
+    <h3 id="faq-script">Can I use Rexec from a plain Python script (not a notebook)?</h3>
+    <p>
+      Yes. <code>ndp_ep</code> and <code>scidx-rexec</code> are plain Python libraries
+      and work in any Python environment — scripts, notebooks, or CI pipelines.
+    </p>
 
-    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
-      <summary style="font-weight:600; cursor:pointer;">What Python packages are available on the remote server?</summary>
-      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
-        This depends on the container image configured by your sysadmin for the rexec-server pods.
-        Ask your NDP Endpoint Provider which images and pre-installed packages are available.
-      </p>
-    </details>
+    <h3 id="faq-packages">What Python packages are available on the remote server?</h3>
+    <p>
+      This depends on the container image configured by your sysadmin for the rexec-server pods.
+      Ask your NDP Endpoint Provider which images and pre-installed packages are available.
+    </p>
 
-    <details style="border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:.75rem;">
-      <summary style="font-weight:600; cursor:pointer;">Is my code sent over the network unencrypted?</summary>
-      <p style="margin-top:.75rem; color:var(--muted); font-size:.9rem;">
-        The ZeroMQ transport between client and broker is token-authenticated. Whether TLS
-        is applied depends on the broker's NodePort configuration. For production deployments,
-        sysadmins should terminate TLS at the Ingress or use a secure tunnel.
-      </p>
-    </details>
+    <h3 id="faq-encryption">Is my code sent over the network unencrypted?</h3>
+    <p>
+      The ZeroMQ transport between client and broker is token-authenticated. Whether TLS
+      is applied depends on the broker's NodePort configuration. For production deployments,
+      sysadmins should terminate TLS at the Ingress or use a secure tunnel.
+    </p>
 
   </main>
 </div><!-- /.doc-layout -->
@@ -397,16 +425,36 @@ function copyCode(btn) {
     setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   });
 }
-// Sidebar active link highlight on scroll
-const sections = document.querySelectorAll('[id]');
+// Sidebar: highlight the current section and subsection, expand its subsection list
+const heads = document.querySelectorAll('main h2[id], main h3[id]');
 const links = document.querySelectorAll('.doc-sidebar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
-  links.forEach(l => {
-    l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+const groups = document.querySelectorAll('.doc-sidebar .has-sub');
+function setOpen(li, open) {
+  li.classList.toggle('open', open);
+  li.querySelector('.sub-toggle').setAttribute('aria-expanded', open);
+}
+groups.forEach(li => li.querySelector('.sub-toggle').addEventListener('click', () => {
+  li.dataset.manual = '1';
+  setOpen(li, !li.classList.contains('open'));
+}));
+function updateSidebar() {
+  let section = '', sub = '';
+  heads.forEach(h => {
+    if (window.scrollY >= h.offsetTop - 90) {
+      if (h.tagName === 'H2') { section = h.id; sub = ''; } else { sub = h.id; }
+    }
   });
-}, { passive: true });
+  links.forEach(l => {
+    const id = l.getAttribute('href').slice(1);
+    l.classList.toggle('active', id === section || id === sub);
+  });
+  groups.forEach(li => {
+    if (li.dataset.manual) return;
+    setOpen(li, li.querySelector(':scope > a').getAttribute('href') === '#' + section);
+  });
+}
+window.addEventListener('scroll', updateSidebar, { passive: true });
+updateSidebar();
 </script>
 </body>
 </html>

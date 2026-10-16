@@ -80,7 +80,7 @@ limitation: requirement predefined
 
 100 runs, calculate avg
 
-## done 5. Server Lifecycle & Shutdown 
+## 5. Server Lifecycle & Shutdown 
 DD: July 2, 2026
 -  Auto-shutdown for idle/completed rexec-server
 -  User-controlled shutdown (manual kill/cancel API)

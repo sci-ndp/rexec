@@ -194,27 +194,37 @@ pre .decorator { color: #F59E0B; font-weight: 700; }
 }
 .nav-dropdown-menu li { margin: 0; }
 .nav-dropdown-menu a { white-space: nowrap; }
-.nav-cta {
+.btn.nav-cta {
   margin-left: auto;
-  background: var(--blue);
-  color: #fff !important;
-  padding: .4rem 1rem !important;
+  background: transparent;
+  color: var(--muted) !important;
+  border: 1px solid var(--border);
+  padding: .3rem .75rem !important;
   border-radius: var(--radius-sm);
-  font-weight: 600 !important;
-  transition: background var(--transition) !important;
+  font-size: .85rem;
+  font-weight: 500 !important;
+  transition: background var(--transition), color var(--transition), border-color var(--transition) !important;
 }
-.nav-cta:hover { background: var(--blue-hover) !important; text-decoration: none !important; }
+.btn.nav-cta:hover {
+  background: var(--blue-light) !important;
+  color: var(--blue) !important;
+  border-color: var(--blue-mid);
+  text-decoration: none !important;
+}
 
 .nav-ndp-logo {
   display: flex;
   align-items: center;
-  opacity: .85;
-  transition: opacity var(--transition);
-  border-left: 1px solid var(--border);
-  padding-left: 1rem;
+  border-right: 1px solid var(--border);
+  padding-right: 1rem;
 }
-.nav-ndp-logo:hover { opacity: 1; }
-.nav-ndp-logo img { height: 30px; width: auto; display: block; }
+.nav-ndp-logo img {
+  height: 16px; width: auto; display: block;
+  filter: grayscale(1);
+  opacity: .45;
+  transition: filter var(--transition), opacity var(--transition);
+}
+.nav-ndp-logo:hover img { filter: none; opacity: 1; }
 /* Footer NDP logo */
 .footer-ndp-logo { opacity: .7; transition: opacity var(--transition); }
 .footer-ndp-logo:hover { opacity: 1; }
@@ -232,14 +242,25 @@ pre .decorator { color: #F59E0B; font-weight: 700; }
   position: relative;
   overflow: hidden;
 }
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
 .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
 .hero h1 { color: #fff; margin-bottom: 1.25rem; }
+.hero-title {
+  display: flex; align-items: center; justify-content: center;
+  flex-wrap: wrap; gap: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.hero-title h1 { margin-bottom: 0; }
+.hero-ndp-logo {
+  display: flex; align-items: center;
+  padding-right: 1.5rem;
+  border-right: 1px solid rgba(255,255,255,.25);
+}
+.hero-ndp-logo img {
+  height: 34px; width: auto; display: block;
+  filter: brightness(0) invert(1); opacity: .55;
+  transition: opacity var(--transition);
+}
+.hero-ndp-logo:hover img { opacity: .85; }
 .hero p  { color: rgba(255,255,255,.82); font-size: 1.15rem; margin-bottom: 2rem; }
 
 .hero-badge {
@@ -440,6 +461,15 @@ td:first-child { font-family: 'JetBrains Mono', monospace; font-size: .8rem; col
 /* ── Homepage overview ────────────────────────────────────── */
 .overview { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 3.5rem; align-items: start; margin-bottom: 3rem; }
 .overview-text h2 { margin-bottom: 1rem; }
+.overview-cta {
+  margin-top: .5rem;
+  padding: .4rem 1rem;
+  font-size: .875rem; font-weight: 500;
+  color: var(--blue);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+.overview-cta:hover { background: var(--blue-light); border-color: var(--blue-mid); color: var(--blue); text-decoration: none; }
 .overview-facts { margin: .5rem 0 0; border-top: 1px solid var(--border); }
 .overview-facts div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid var(--border); }
 .overview-facts dt { font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: .2rem; }

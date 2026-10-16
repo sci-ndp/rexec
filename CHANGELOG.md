@@ -5,6 +5,31 @@ Dev-progress log for the Rexec , covering
 `rexec-server-k8s-deployment-api`, and `ndp-ep-py`. Newest entries first,
 grouped by repo.
 
+## 2026-10-14 — Rename `force` to `force_reinstall`
+
+Breaking: the `force` option added on 2026-09-04 is renamed to
+`force_reinstall` across all three layers, including the `/spawn` form
+field. Behavior is unchanged. Clients and the deployment API must be
+upgraded together; an old client's `force` is ignored by the new API (and
+vice versa), so a replace request falls back to a 409 conflict.
+
+**rexec-server-k8s-deployment-api** (0.1.0)
+- `/spawn` now reads the `force_reinstall` form field instead of `force`.
+  <br>
+  https://github.com/sci-ndp/rexec-server-k8s-deployment-api/commit/594f4aab8d5d988903ca41182b278157bf965f36
+
+**SciDx-rexec** (0.1.0)
+- `set_environment(..., force_reinstall=False)` replaces the `force`
+  argument and sends `force_reinstall` to the deployment API.
+  <br>
+  https://github.com/sci-ndp/SciDx-rexec/commit/34e3173cd725d02f91ea4de23aafc19ec01031f8
+
+**ndp-ep-py**
+- `setup_rexec_environment(..., force_reinstall=False)` replaces the
+  `force` argument; tests cover the default and the passthrough.
+  <br>
+  https://github.com/sci-ndp/ndp-ep-py/commit/f8f43ac24c8033c5e728bf7a3b783d2029ef65b5
+
 ## 2026-09-04 — Abuse-prevention hardening & respawn semantics
 
 **rexec-server-k8s-deployment-api**
