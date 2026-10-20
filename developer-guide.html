@@ -34,7 +34,7 @@
   <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" title="Rexec source code on GitHub" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>sci-ndp/rexec</a>
 </header>
 
-<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#0D1829 0%,#1A2B4A 60%,#0D2D6E 100%);">
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
   <div class="hero-inner">
     <h1>Developer Guide</h1>
     <p>Set up a local development stack, understand the codebase structure, and contribute to the SciDx Rexec ecosystem.</p>
@@ -64,7 +64,15 @@
       </ul>
       <div class="sidebar-section">Contributing</div>
       <ul>
-        <li><a href="#contributing">Guidelines</a></li>
+        <li class="has-sub">
+          <a href="#contributing">Guidelines</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#contrib-repos">Client Library and Server Repos</a></li>
+            <li><a href="#contrib-ci">Docker Image CI</a></li>
+            <li><a href="#contrib-commits">Commit Style</a></li>
+          </ul>
+        </li>
         <li><a href="#release">Release Process</a></li>
         <li><a href="#helm-dev">Helm Chart Dev</a></li>
       </ul>
@@ -289,7 +297,6 @@ print(result)</code></pre>
     </div>
 
     <div class="callout callout-warn">
-      <span class="callout-icon">⚠️</span>
       <div class="callout-body">
         <strong>Server pod not auto-provisioned via NDP EP</strong>
         When calling <code>remote_func</code> directly, <code>set_environment</code> triggers
@@ -383,7 +390,7 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
       </div>
     </div>
 
-    <h3>Client Library and Server Repos</h3>
+    <h3 id="contrib-repos">Client Library and Server Repos</h3>
     <p>
       For <strong>scidx-rexec</strong> (client library) and the <strong>rexec server</strong> repo,
       follow the standard PR process — open a pull request against <code>main</code>, and a rexec admin
@@ -391,7 +398,7 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
       by the rexec admin team; contributors do not need to handle publishing.
     </p>
 
-    <h3>Docker Image CI: Broker and Server Deploy API</h3>
+    <h3 id="contrib-ci">Docker Image CI: Broker and Server Deploy API</h3>
     <p>
       The <strong>broker</strong> and <strong>server-deploy-api</strong> repos each have a GitHub Actions
       workflow that fires on every merge to <code>main</code>. It builds the Docker image and pushes it to
@@ -406,7 +413,7 @@ Broker backend (ROUTER) ──→ Server Pod (DEALER)</code></pre>
       </div>
     </div>
 
-    <h3>Commit Style</h3>
+    <h3 id="contrib-commits">Commit Style</h3>
     <p>Follow <a href="https://www.conventionalcommits.org/" target="_blank">Conventional Commits</a>:</p>
     <div class="pre-wrap">
       <pre><code>feat: add async job dispatch to rexec client
@@ -528,7 +535,7 @@ helm upgrade --install rexec ./helm/rexec -f ./helm/rexec/values.yaml -n rexec -
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <span>© 2026 SciDx · Apache 2.0 License</span>
     <a class="footer-scidx-logo" href="https://scidx.sci.utah.edu" target="_blank" title="SciDx">
       <img src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
     </a>
@@ -536,21 +543,6 @@ helm upgrade --install rexec ./helm/rexec -f ./helm/rexec/values.yaml -n rexec -
   </div>
 </footer>
 
-<script>
-function copyCode(btn) {
-  const pre = btn.closest('.pre-wrap').querySelector('pre');
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-const sections = document.querySelectorAll('[id]');
-const links = document.querySelectorAll('.doc-sidebar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
-  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
-}, { passive: true });
-</script>
+<script src="assets/docs.js"></script>
 </body>
 </html>

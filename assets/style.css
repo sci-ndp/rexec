@@ -235,7 +235,7 @@ pre .decorator { color: #F59E0B; font-weight: 700; }
 
 /* ── Hero ─────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, var(--navy) 0%, #0039A7 60%, #1E60D4 100%);
+  background: var(--navy);
   color: #fff;
   padding: 5rem 2rem 4rem;
   text-align: center;
@@ -601,3 +601,77 @@ footer {
 }
 .copy-btn:hover { background: #0039A7; color: #fff; border-color: rgba(255,255,255,.5); }
 .copy-btn.copied { background: #065F46; color: #86EFAC; border-color: #6EE7B7; }
+
+/* ── Doc page look (shared by all sidebar pages) ──────────── */
+/* Inline code reads as bold text; code blocks keep the dark style */
+.doc-content :not(pre) > code { background: none; padding: 0; border: 0; border-radius: 0; color: inherit; font-family: inherit; font-size: inherit; font-weight: 700; }
+
+/* Plain tables: no filled header, no row hover, prose first column */
+.doc-content .table-wrap { margin-bottom: 1.25rem; }
+.doc-content td { vertical-align: top; }
+.doc-content td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); }
+.doc-content .split td:first-child { width: 40%; }
+.doc-content tbody tr:hover { background: none; }
+.doc-content thead { background: none; color: var(--text); border-bottom: 1px solid var(--border); }
+.doc-content thead th { font-size: .85rem; font-weight: 600; }
+.doc-content th:not(:last-child), .doc-content td:not(:last-child) { border-right: 1px solid var(--border); }
+.doc-content .group-row td { background: var(--surface); color: var(--navy); font-weight: 600; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; padding: .55rem 1rem; }
+
+/* Callouts: left rule with a small uppercase label instead of a coloured box */
+.doc-content .callout { display: block; background: none; border: 0; border-left: 3px solid var(--navy); border-radius: 0; color: var(--text); padding: .2rem 0 .2rem 1.1rem; margin: 1.25rem 0 1.5rem; }
+.doc-content .callout-icon { display: none; }
+.doc-content .callout-body { font-size: .92rem; }
+.doc-content .callout-body::before { display: block; margin-bottom: .3rem; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
+.doc-content .callout-danger .callout-body::before { content: "Important"; }
+.doc-content .callout-warn .callout-body::before { content: "Caution"; }
+.doc-content .callout-info .callout-body::before { content: "Note"; }
+.doc-content .callout-tip .callout-body::before { content: "Tip"; }
+.doc-content .callout-body strong { color: var(--navy); }
+
+/* Cards: flat white boxes, no hover lift */
+.doc-content .grid { gap: 1rem; }
+.doc-content .card { background: #fff; border-radius: var(--radius-md); padding: 1rem 1.1rem; }
+.doc-content .card:hover { box-shadow: none; transform: none; }
+.doc-content .card h4 { color: var(--navy); font-weight: 700; margin-bottom: .35rem; }
+.doc-content .card p { font-size: .875rem; color: var(--muted); margin: 0; }
+.doc-content .card-icon { width: auto; height: auto; display: block; background: none; border-radius: 0; color: var(--muted); font-size: 1.05rem; font-weight: 600; margin-bottom: .35rem; }
+
+/* Numbered steps: outlined numbers instead of filled circles */
+.doc-content .steps { gap: 1.5rem; margin-bottom: 1.25rem; }
+.doc-content .step { gap: 1rem; }
+.doc-content .step-num { width: 1.6rem; height: 1.6rem; background: none; border: 1px solid var(--border); color: var(--muted); font-size: .8rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.doc-content .step-body { flex: 1; min-width: 0; }
+.doc-content .step-body h4 { color: var(--navy); }
+.doc-content .step-body p { color: var(--text); }
+
+/* Badges read as outlined tags, like .sem-tag */
+.doc-content .badge { padding: 0 .4rem; background: none; border: 1px solid var(--border); border-radius: 3px; color: var(--muted); font-size: .66rem; font-weight: 700; letter-spacing: .07em; line-height: 1.5; vertical-align: 1px; white-space: nowrap; }
+.doc-content .badge-navy, .doc-content .badge-green { color: var(--navy); border-color: var(--navy); }
+
+/* Diagrams sit on a white framed panel */
+.doc-content .arch-diagram { background: #fff; border: 1px solid var(--border); }
+
+.doc-content .component-pill { background: #fff; }
+.doc-content .component-pill-dot { background: var(--navy); }
+
+/* h2s already carry a top rule, so standalone dividers would double it */
+.doc-content .divider { display: none; }
+
+/* ── Doc components ───────────────────────────────────────── */
+.scope-line { font-size: .85rem; color: var(--muted); margin-bottom: 1.75rem; }
+.meta-line { font-size: .8rem; color: var(--muted); border-left: 3px solid var(--border); padding-left: .75rem; }
+
+.sem-tag { display: inline-block; margin-right: .35rem; padding: 0 .4rem; border: 1px solid var(--border); border-radius: 3px; font-size: .66rem; font-weight: 700; letter-spacing: .07em; line-height: 1.5; text-transform: uppercase; color: var(--muted); vertical-align: 1px; white-space: nowrap; }
+.sem-tag.sem-guaranteed { color: var(--navy); border-color: var(--navy); }
+
+/* Numbered annotations on code lines, explained by a following .code-notes list */
+.anno::after { content: attr(data-n); display: inline-block; margin-left: .9rem; width: 1.15rem; height: 1.15rem; line-height: 1.05rem; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; text-align: center; font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.7); vertical-align: 1px; }
+.code-notes { margin: -.5rem 0 1.5rem; padding-left: 1.5rem; font-size: .88rem; color: var(--text); }
+.code-notes li { margin-bottom: .3rem; padding-left: .25rem; }
+.code-notes li::marker { color: var(--muted); font-weight: 600; }
+
+.rules { list-style: none; padding: 0; counter-reset: rule; display: grid; gap: .6rem; }
+.rules li { counter-increment: rule; position: relative; margin: 0; padding: .8rem 1rem .8rem 3.1rem; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-md); font-size: .92rem; }
+.rules li::before { content: counter(rule) "."; position: absolute; left: 1rem; top: .8rem; width: 1.5rem; text-align: right; color: var(--muted); font-size: .92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rules li strong { color: var(--navy); }
+.rules li a { font-size: .82rem; white-space: nowrap; }

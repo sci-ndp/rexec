@@ -6,32 +6,6 @@
   <title>User Guide - Remote Execution</title>
   <meta name="description" content="End user guide for running remote jobs via NDP Endpoint and the Rexec library." />
   <link rel="stylesheet" href="assets/style.css" />
-  <style>
-    /* Page-specific components (shared look with how-it-works.html) */
-    .anno::after { content: attr(data-n); display: inline-block; margin-left: .9rem; width: 1.15rem; height: 1.15rem; line-height: 1.05rem; border: 1px solid rgba(255,255,255,.35); border-radius: 50%; text-align: center; font-family: 'Inter', sans-serif; font-size: .65rem; font-weight: 600; color: rgba(255,255,255,.7); vertical-align: 1px; }
-    .code-notes { margin: -.5rem 0 1.5rem; padding-left: 1.5rem; font-size: .88rem; color: var(--text); }
-    .code-notes li { margin-bottom: .3rem; padding-left: .25rem; }
-    .code-notes li::marker { color: var(--muted); font-weight: 600; }
-    main :not(pre) > code { background: none; padding: 0; border: 0; border-radius: 0; color: inherit; font-family: inherit; font-size: inherit; font-weight: 700; }
-    .plain-table td:first-child { font-family: inherit; font-size: .9rem; color: var(--text); }
-    .plain-table.split td:first-child { width: 40%; }
-    table tbody tr:hover { background: none; }
-    .plain-table thead { background: none; color: var(--text); border-bottom: 1px solid var(--border); }
-    .plain-table thead th { font-size: .85rem; font-weight: 600; }
-    .plain-table th:not(:last-child), .plain-table td:not(:last-child) { border-right: 1px solid var(--border); }
-    td { vertical-align: top; }
-
-    .scope-line { font-size: .85rem; color: var(--muted); margin-bottom: 1.75rem; }
-    main .callout { display: block; background: none; border: 0; border-left: 3px solid var(--navy); border-radius: 0; color: var(--text); padding: .2rem 0 .2rem 1.1rem; margin: 1.25rem 0 1.5rem; }
-    main .callout-icon { display: none; }
-    main .callout-body { font-size: .92rem; }
-    main .callout-body::before { display: block; margin-bottom: .3rem; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--navy); }
-    main .callout-danger .callout-body::before { content: "Important"; }
-    main .callout-warn .callout-body::before { content: "Caution"; }
-    main .callout-info .callout-body::before { content: "Note"; }
-    main .callout-tip .callout-body::before { content: "Tip"; }
-    main .callout-body strong { color: var(--navy); }
-  </style>
 </head>
 <body class="page-body">
 
@@ -403,7 +377,7 @@ print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <span>© 2026 SciDx · Apache 2.0 License</span>
     <a class="footer-scidx-logo" href="https://scidx.sci.utah.edu" target="_blank" title="SciDx">
       <img src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
     </a>
@@ -411,50 +385,6 @@ print(f<span class="str">"π ≈ {result}"</span>)</code></pre>
   </div>
 </footer>
 
-<script>
-function switchTab(e, id) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  e.target.classList.add('active');
-  document.getElementById(id).classList.add('active');
-}
-function copyCode(btn) {
-  const pre = btn.closest('.pre-wrap').querySelector('pre');
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-// Sidebar: highlight the current section and subsection, expand its subsection list
-const heads = document.querySelectorAll('main h2[id], main h3[id]');
-const links = document.querySelectorAll('.doc-sidebar a');
-const groups = document.querySelectorAll('.doc-sidebar .has-sub');
-function setOpen(li, open) {
-  li.classList.toggle('open', open);
-  li.querySelector('.sub-toggle').setAttribute('aria-expanded', open);
-}
-groups.forEach(li => li.querySelector('.sub-toggle').addEventListener('click', () => {
-  li.dataset.manual = '1';
-  setOpen(li, !li.classList.contains('open'));
-}));
-function updateSidebar() {
-  let section = '', sub = '';
-  heads.forEach(h => {
-    if (window.scrollY >= h.offsetTop - 90) {
-      if (h.tagName === 'H2') { section = h.id; sub = ''; } else { sub = h.id; }
-    }
-  });
-  links.forEach(l => {
-    const id = l.getAttribute('href').slice(1);
-    l.classList.toggle('active', id === section || id === sub);
-  });
-  groups.forEach(li => {
-    if (li.dataset.manual) return;
-    setOpen(li, li.querySelector(':scope > a').getAttribute('href') === '#' + section);
-  });
-}
-window.addEventListener('scroll', updateSidebar, { passive: true });
-updateSidebar();
-</script>
+<script src="assets/docs.js"></script>
 </body>
 </html>

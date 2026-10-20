@@ -35,7 +35,7 @@
 </header>
 
 <!-- ── Hero ─────────────────────────────────────────────────── -->
-<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#001642 0%,#0D2D6E 60%,#1E4FA0 100%);">
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
   <div class="hero-inner">
     <div class="hero-badge">NDP Endpoint Provider</div>
     <h1>Sysadmin Guide</h1>
@@ -61,18 +61,31 @@
       </ul>
       <div class="sidebar-section">Helm Deployment</div>
       <ul>
-        <li><a href="#helm-deploy">Overview</a></li>
-        <li><a href="#helm-install">Add Helm Repo</a></li>
-        <li><a href="#helm-values">Configure values.yaml</a></li>
-        <li><a href="#helm-run">Install Chart</a></li>
-        <li><a href="#helm-verify">Verify</a></li>
-        <li><a href="#helm-uninstall">Uninstall</a></li>
+        <li class="has-sub">
+          <a href="#helm-deploy">Overview</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#helm-install">Add Helm Repo</a></li>
+            <li><a href="#helm-values">Configure values.yaml</a></li>
+            <li><a href="#helm-run">Install Chart</a></li>
+            <li><a href="#helm-verify">Verify</a></li>
+            <li><a href="#helm-uninstall">Uninstall</a></li>
+          </ul>
+        </li>
       </ul>
       <div class="sidebar-section">Operations</div>
       <ul>
         <li><a href="#access-control">Access Control</a></li>
         <li><a href="#ops-verify">Health Checks</a></li>
-        <li><a href="#ops-troubleshoot">Troubleshooting</a></li>
+        <li class="has-sub">
+          <a href="#ops-troubleshoot">Troubleshooting</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#ts-nodeport">Broker NodePort not reachable</a></li>
+            <li><a href="#ts-403">Deploy API returns 403</a></li>
+            <li><a href="#ts-imagepull">Pods not starting</a></li>
+          </ul>
+        </li>
       </ul>
     </nav>
   </aside>
@@ -81,21 +94,21 @@
 
     <h2 id="prereqs">Prerequisites</h2>
     <div class="grid grid-2" style="margin-bottom:1.5rem;">
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Kubernetes Cluster</h4>
-        <p style="font-size:.875rem;">Access to a K8s cluster with <code>kubectl</code> permissions to create namespaces, deployments, services, ClusterRoles, and ServiceAccounts.</p>
+        <p>Access to a K8s cluster with <code>kubectl</code> permissions to create namespaces, deployments, services, ClusterRoles, and ServiceAccounts.</p>
       </div>
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Helm ≥ 3.10</h4>
-        <p style="font-size:.875rem;">Required for the recommended Helm deployment path. Install via <code>brew install helm</code> or the <a href="https://helm.sh/docs/intro/install/" target="_blank">official docs</a>.</p>
+        <p>Required for the recommended Helm deployment path. Install via <code>brew install helm</code> or the <a href="https://helm.sh/docs/intro/install/" target="_blank">official docs</a>.</p>
       </div>
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Ingress Controller</h4>
-        <p style="font-size:.875rem;">An Ingress controller (e.g., <strong>nginx</strong>) must be installed in your cluster to expose the Deploy API and NDP EP API over HTTP(S).</p>
+        <p>An Ingress controller (e.g., <strong>nginx</strong>) must be installed in your cluster to expose the Deploy API and NDP EP API over HTTP(S).</p>
       </div>
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Authentication API</h4>
-        <p style="font-size:.875rem;">A reachable identity API endpoint that accepts Bearer tokens and returns user info (username, groups). See Auth API section below.</p>
+        <p>A reachable identity API endpoint that accepts Bearer tokens and returns user info (username, groups). See Auth API section below.</p>
       </div>
     </div>
 
@@ -106,7 +119,6 @@
       header and return a JSON body with user information including group membership.
     </p>
     <div class="callout callout-tip">
-      <!-- <span class="callout-icon">🧪</span> -->
       <div class="callout-body">
         <strong>Test IDP available</strong>
         For initial testing, use the NDP test identity provider:
@@ -115,7 +127,6 @@
       </div>
     </div>
     <div class="callout callout-warn">
-      <span class="callout-icon">⚠️</span>
       <div class="callout-body">
         <strong>Use the same AUTH_API_URL across all components.</strong>
         Mixing different IDP URLs between the broker, deploy API, and ep-api will cause
@@ -139,17 +150,17 @@
       />
     </div>
     <div class="grid grid-3" style="margin-top:1.5rem;">
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Rexec Broker</h4>
-        <p style="font-size:.875rem;">ZeroMQ ROUTER–DEALER proxy. Always running. Exposes NodePort <code>30001</code> to clients and ClusterIP <code>5560</code> to server pods.</p>
+        <p>ZeroMQ ROUTER–DEALER proxy. Always running. Exposes NodePort <code>30001</code> to clients and ClusterIP <code>5560</code> to server pods.</p>
       </div>
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>Server Deploy API (spawn api)</h4>
-        <p style="font-size:.875rem;">FastAPI service that spawns and tears down rexec server pods in Kubernetes on demand. Requires kubeconfig access.</p>
+        <p>FastAPI service that spawns and tears down rexec server pods in Kubernetes on demand. Requires kubeconfig access.</p>
       </div>
-      <div class="card" style="padding:1.1rem;">
+      <div class="card">
         <h4>NDP EP API</h4>
-        <p style="font-size:.875rem;">FastAPI gateway that end users call. Authenticates requests, delegates spawn to Deploy API, and returns the broker URL to the client.</p>
+        <p>FastAPI gateway that end users call. Authenticates requests, delegates spawn to Deploy API, and returns the broker URL to the client.</p>
       </div>
     </div>
 
@@ -163,11 +174,11 @@
     </p>
 
     <div class="component-row">
-      <span class="component-pill"><span class="component-pill-dot" style="background:#3B82F6;"></span>rexec-broker</span>
+      <span class="component-pill"><span class="component-pill-dot"></span>rexec-broker</span>
       <span style="color:var(--muted);">+</span>
-      <span class="component-pill"><span class="component-pill-dot" style="background:#10B981;"></span>rexec-server-deployment-api</span>
+      <span class="component-pill"><span class="component-pill-dot"></span>rexec-server-deployment-api</span>
       <span style="color:var(--muted);">+</span>
-      <span class="component-pill"><span class="component-pill-dot" style="background:#8B5CF6;"></span>ndp-ep-api</span>
+      <span class="component-pill"><span class="component-pill-dot"></span>ndp-ep-api</span>
     </div>
 
     <h3 id="helm-install">Add the Helm Repository</h3>
@@ -381,21 +392,21 @@ kubectl get ingress -n rexec</code></pre>
 
     <h2 id="ops-troubleshoot">Troubleshooting</h2>
 
-    <h3>Broker NodePort not reachable from clients</h3>
+    <h3 id="ts-nodeport">Broker NodePort not reachable from clients</h3>
     <ul>
       <li>Confirm the node's firewall allows inbound TCP on port <code>30001</code></li>
       <li>Run <code>kubectl get svc -n rexec-broker</code> — ensure NodePort is <code>30001</code></li>
       <li>Test connectivity: <code>nc -zv &lt;node-ip&gt; 30001</code></li>
     </ul>
 
-    <h3>Deploy API returns 403</h3>
+    <h3 id="ts-403">Deploy API returns 403</h3>
     <ul>
       <li>Check that <code>AUTH_API_URL</code> is reachable from inside the pod</li>
       <li>If ACL is enabled, confirm the user belongs to a group in <code>GROUP_NAMES</code></li>
       <li>Inspect pod logs: <code>kubectl logs -n rexec deployment/rexec-server-deployment-api</code></li>
     </ul>
 
-    <h3>Pods not starting (ImagePullBackOff)</h3>
+    <h3 id="ts-imagepull">Pods not starting (ImagePullBackOff)</h3>
     <ul>
       <li>Verify image registry access from the cluster nodes</li>
       <li>Check <code>kubectl describe pod &lt;pod-name&gt; -n rexec</code> for pull errors</li>
@@ -437,7 +448,7 @@ kubectl get ingress -n rexec</code></pre>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <span>© 2026 SciDx · Apache 2.0 License</span>
     <a class="footer-scidx-logo" href="https://scidx.sci.utah.edu" target="_blank" title="SciDx">
       <img src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
     </a>
@@ -445,21 +456,6 @@ kubectl get ingress -n rexec</code></pre>
   </div>
 </footer>
 
-<script>
-function copyCode(btn) {
-  const pre = btn.closest('.pre-wrap').querySelector('pre');
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-const sections = document.querySelectorAll('[id]');
-const links = document.querySelectorAll('.doc-sidebar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
-  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
-}, { passive: true });
-</script>
+<script src="assets/docs.js"></script>
 </body>
 </html>
