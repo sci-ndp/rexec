@@ -225,10 +225,10 @@ pre .decorator { color: #F59E0B; font-weight: 700; }
   transition: filter var(--transition), opacity var(--transition);
 }
 .nav-ndp-logo:hover img { filter: none; opacity: 1; }
-/* Footer NDP logo */
-.footer-ndp-logo { opacity: .7; transition: opacity var(--transition); }
-.footer-ndp-logo:hover { opacity: 1; }
-.footer-ndp-logo img { height: 36px; width: auto; display: block; filter: brightness(0) invert(1); }
+/* Footer SciDx logo */
+.footer-scidx-logo { opacity: .7; transition: opacity var(--transition); }
+.footer-scidx-logo:hover { opacity: 1; }
+.footer-scidx-logo img { height: 36px; width: auto; display: block; filter: brightness(0) invert(1); }
 
 /* ── Page shell ───────────────────────────────────────────── */
 .page-body { padding-top: var(--nav-h); }
