@@ -7,24 +7,22 @@
   <meta name="description" content="API reference for the Rexec Deploy API and NDP Endpoint API — endpoints, authentication, and request/response formats." />
   <link rel="stylesheet" href="assets/style.css" />
   <style>
-    .method { display:inline-block; padding:.2rem .55rem; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.75rem; font-weight:700; min-width:52px; text-align:center; margin-right:.5rem; }
-    .get    { background:#ECFDF5; color:#065F46; }
-    .post   { background:#EEF4FF; color:#1939A7; }
-    .delete { background:#FEF2F2; color:#7F1D1D; }
-    .put    { background:#FFFBEB; color:#78350F; }
+    /* Page-specific components; the shared doc look lives in assets/style.css */
+    .method { display:inline-block; padding:0 .4rem; border:1px solid var(--border); border-radius:3px; font-size:.66rem; font-weight:700; letter-spacing:.07em; line-height:1.5; min-width:44px; text-align:center; margin-right:.5rem; color:var(--muted); }
+    .post, .delete, .put { color:var(--navy); border-color:var(--navy); }
     .endpoint { border:1px solid var(--border); border-radius:var(--radius-md); margin-bottom:1rem; overflow:hidden; }
-    .endpoint-header { padding:.85rem 1.1rem; display:flex; align-items:center; gap:.75rem; background:var(--card-bg); cursor:pointer; user-select:none; }
-    .endpoint-header:hover { background:var(--blue-light); }
-    .endpoint-path { font-family:'JetBrains Mono',monospace; font-size:.9rem; color:var(--navy); font-weight:500; }
+    .endpoint-header { padding:.85rem 1.1rem; display:flex; align-items:center; gap:.75rem; background:#fff; cursor:pointer; user-select:none; }
+    .endpoint-header:hover { background:var(--surface); }
+    .endpoint-path { font-size:.9rem; color:var(--navy); font-weight:700; }
     .endpoint-desc { color:var(--muted); font-size:.875rem; margin-left:auto; }
     .endpoint-body { padding:1.1rem; border-top:1px solid var(--border); background:#fff; }
     .param-table { width:100%; border-collapse:collapse; font-size:.875rem; margin-bottom:.75rem; }
-    .param-table th { background:var(--surface); padding:.45rem .75rem; text-align:left; font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+    .param-table th { padding:.45rem .75rem; text-align:left; }
     .param-table td { padding:.45rem .75rem; border-top:1px solid var(--border); }
-    .param-table td:first-child { font-family:'JetBrains Mono',monospace; color:var(--blue); font-size:.82rem; }
-    .required { color:var(--red); font-size:.7rem; font-weight:700; }
+    .doc-content .param-table td:first-child { font-weight:700; }
+    .required { color:var(--navy); font-size:.7rem; font-weight:700; }
     .optional { color:var(--muted); font-size:.7rem; }
-    .auth-badge { background:#FEF2F2; color:#7F1D1D; border:1px solid #FCA5A5; border-radius:4px; font-size:.72rem; padding:.1rem .45rem; font-weight:600; }
+    .auth-badge { border:1px solid var(--navy); color:var(--navy); border-radius:3px; font-size:.72rem; padding:.1rem .45rem; font-weight:600; }
   </style>
 </head>
 <body class="page-body">
@@ -54,7 +52,7 @@
   <a class="btn btn-blue nav-cta" href="https://github.com/sci-ndp/rexec" title="Rexec source code on GitHub" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:.4em"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>sci-ndp/rexec</a>
 </header>
 
-<section class="hero" style="padding:3.5rem 2rem 3rem; background:linear-gradient(135deg,#001642 0%,#0039A7 100%);">
+<section class="hero" style="padding:3.5rem 2rem 3rem;">
   <div class="hero-inner">
     <h1>API Reference</h1>
     <p>
@@ -75,20 +73,37 @@
     <nav>
       <div class="sidebar-section">Auth</div>
       <ul>
-        <li><a href="#auth">Authentication</a></li>
-        <li><a href="#auth-scheme">Bearer Token</a></li>
+        <li class="has-sub">
+          <a href="#auth">Authentication</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#auth-scheme">Bearer Token</a></li>
+            <li><a href="#auth-validation">How token validation works</a></li>
+            <li><a href="#auth-groups">Group-based access control</a></li>
+          </ul>
+        </li>
       </ul>
       <div class="sidebar-section">Deploy API</div>
       <ul>
-        <li><a href="#deploy-api">Overview</a></li>
-        <li><a href="#deploy-spawn">POST /spawn</a></li>
-        <li><a href="#deploy-broker-config">GET /broker-config</a></li>
+        <li class="has-sub">
+          <a href="#deploy-api">Overview</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#deploy-spawn">POST /spawn</a></li>
+            <li><a href="#deploy-broker-config">GET /broker-config</a></li>
+          </ul>
+        </li>
       </ul>
       <div class="sidebar-section">NDP EP API</div>
       <ul>
-        <li><a href="#ep-api">Overview</a></li>
-        <li><a href="#ep-health">GET /health</a></li>
-        <li><a href="#ep-rexec-info">GET /status/rexec</a></li>
+        <li class="has-sub">
+          <a href="#ep-api">Overview</a>
+          <button class="sub-toggle" type="button" aria-expanded="false" aria-label="Show subsections">▸</button>
+          <ul class="sidebar-sub">
+            <li><a href="#ep-health">GET /health</a></li>
+            <li><a href="#ep-rexec-info">GET /status/rexec</a></li>
+          </ul>
+        </li>
       </ul>
       <div class="sidebar-section">Errors</div>
       <ul>
@@ -111,7 +126,7 @@
       <pre><code>Authorization: Bearer &lt;your-token&gt;</code></pre>
     </div>
 
-    <h3>How token validation works</h3>
+    <h3 id="auth-validation">How token validation works</h3>
     <p>
       Both <strong>Rexec Deploy API</strong> and <strong>NDP Endpoint API</strong> do
       <em>not</em> validate tokens directly. Instead, each service is configured with an
@@ -135,7 +150,7 @@ Authorization: Bearer &lt;your-token&gt;</code></pre>
 }</code></pre>
     </div>
 
-    <h3>Group-based access control</h3>
+    <h3 id="auth-groups">Group-based access control</h3>
     <p>
       Each service can be configured with an <strong>allowed group</strong>
       (<code>GROUP_NAMES</code>). When enabled, the service checks whether any of the
@@ -350,7 +365,7 @@ Authorization: Bearer &lt;your-token&gt;</code></pre>
     </div>
   </div>
   <div class="footer-bottom">
-    <span>© 2026 SciDx / National Data Platform · Apache 2.0 License</span>
+    <span>© 2026 SciDx · Apache 2.0 License</span>
     <a class="footer-scidx-logo" href="https://scidx.sci.utah.edu" target="_blank" title="SciDx">
       <img src="https://scidx.sci.utah.edu/wp-content/uploads/2024/12/logo-sm.png" alt="SciDx" />
     </a>
@@ -358,6 +373,7 @@ Authorization: Bearer &lt;your-token&gt;</code></pre>
   </div>
 </footer>
 
+<script src="assets/docs.js"></script>
 <script>
 function toggleEndpoint(header) {
   const body = header.nextElementSibling;
@@ -366,20 +382,6 @@ function toggleEndpoint(header) {
   body.style.display = open ? 'none' : 'block';
   arrow.textContent = open ? '▼' : '▲';
 }
-function copyCode(btn) {
-  const pre = btn.closest('.pre-wrap').querySelector('pre');
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    btn.textContent = 'Copied!'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
-  });
-}
-const sections = document.querySelectorAll('[id]');
-const links = document.querySelectorAll('.doc-sidebar a');
-window.addEventListener('scroll', () => {
-  let current = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) current = s.id; });
-  links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#' + current); });
-}, { passive: true });
 </script>
 </body>
 </html>
